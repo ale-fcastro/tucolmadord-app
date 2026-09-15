@@ -49,19 +49,22 @@ class HomeScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Expanded(
-                  child: Text('TuColmadoRD', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.primary)),
-                ),
-                Semantics(
-                  label: 'TuColmadoRD',
-                  excludeSemantics: true,
-                  child: Container(
-                    width: 38,
-                    height: 38,
-                    decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-                    alignment: Alignment.center,
-                    child: const Text('CM', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
+                Expanded(
+                  child: Semantics(
+                    label: 'TuColmadoRD',
+                    image: true,
+                    child: const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Image(image: AssetImage('assets/images/logo-full.png'), height: 26),
+                    ),
                   ),
+                ),
+                Container(
+                  width: 38,
+                  height: 38,
+                  padding: const EdgeInsets.all(6),
+                  decoration: const BoxDecoration(color: AppColors.infoBg, shape: BoxShape.circle),
+                  child: Image.asset('assets/images/logo-mark.png'),
                 ),
               ],
             ),

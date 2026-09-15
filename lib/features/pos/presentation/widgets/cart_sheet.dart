@@ -1,55 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/products/entities/product.dart';
 import '../../../../core/utils/money.dart';
 import '../../../../shared/theme/app_colors.dart';
-import '../../../../shared/theme/app_decorations.dart';
-import '../../../../shared/widgets/buttons/primary_button.dart';
-import '../../../../shared/widgets/text/app_text.dart';
-import '../../domain/entities/cart_line.dart';
 import '../cubit/pos_cubit.dart';
 import '../cubit/pos_state.dart';
 import '../screens/cobrar_screen.dart';
-import 'amount_modal.dart';
-import 'weight_modal.dart';
-
-void _editLine(BuildContext context, PosCubit cubit, CartLine line) {
-  final matches = cubit.state.products.where((p) => p.id == line.productId);
-  if (matches.isEmpty) return;
-  final product = matches.first;
-  switch (line.mode) {
-    case SellMode.weight:
-      showWeightModal(
-        context,
-        product: product,
-        initialQty: line.quantity,
-        onConfirm: (qty) {
-          cubit.removeLine(line.id);
-          cubit.addWeightToCart(product, qty);
-        },
-      );
-    case SellMode.amount:
-      showAmountModal(
-        context,
-        product: product,
-        initialAmount: line.lineTotal,
-        onConfirm: (amount) {
-          cubit.removeLine(line.id);
-          cubit.addAmountToCart(product, amount);
-        },
-      );
-    case SellMode.unit:
-      break;
-  }
-}
 
 void showCartSheet(BuildContext context) {
   final cubit = context.read<PosCubit>();
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Theme.of(context).colorScheme.surface,
+    backgroundColor: Colors.white,
     shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(22))),
     builder: (ctx) {
       return BlocProvider.value(
@@ -64,10 +27,13 @@ void showCartSheet(BuildContext context) {
                     padding: const EdgeInsets.fromLTRB(18, 16, 18, 8),
                     child: Row(
                       children: [
-                        Expanded(child: AppTitle('Carrito (${state.cartCount})')),
+                        Expanded(
+                          child: Text('Carrito (${state.cartCount})',
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                        ),
                         GestureDetector(
                           onTap: () => Navigator.of(ctx).pop(),
-                          child: Icon(Icons.close, size: 20, color: Theme.of(context).colorScheme.outline),
+                          child: const Icon(Icons.close, size: 20, color: Color(0x73201F1D)),
                         ),
                       ],
                     ),
@@ -78,24 +44,25 @@ void showCartSheet(BuildContext context) {
                       itemCount: state.cart.length,
                       itemBuilder: (context, i) {
                         final line = state.cart[i];
-                        final row = Container(
+                        return Container(
                           padding: const EdgeInsets.symmetric(vertical: 10),
-                          decoration: AppDecorations.rowDivider(context),
+                          decoration: const BoxDecoration(
+                            border: Border(bottom: BorderSide(color: Color(0x0F201F1D))),
+                          ),
                           child: Row(
                             children: [
-                              Expanded(child: AppSubtitle(line.name)),
+                              Expanded(
+                                child: Text(line.name, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600)),
+                              ),
                               if (line.isUnit)
                                 Container(
-                                  decoration: BoxDecoration(color: AppColors.backgroundLight, borderRadius: BorderRadius.circular(AppDecorations.radius)),
-                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                                  decoration: BoxDecoration(color: const Color(0xFFF6F1E8), borderRadius: BorderRadius.circular(10)),
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   child: Row(
                                     children: [
                                       GestureDetector(
                                         onTap: () => cubit.decrementLine(line.id),
-                                        child: const Padding(
-                                          padding: EdgeInsets.all(12),
-                                          child: Icon(Icons.remove, size: 14, color: AppColors.primary),
-                                        ),
+                                        child: const Icon(Icons.remove, size: 14, color: AppColors.primary),
                                       ),
                                       SizedBox(
                                         width: 24,
@@ -105,10 +72,7 @@ void showCartSheet(BuildContext context) {
                                       ),
                                       GestureDetector(
                                         onTap: () => cubit.incrementLine(line.id),
-                                        child: const Padding(
-                                          padding: EdgeInsets.all(12),
-                                          child: Icon(Icons.add, size: 14, color: AppColors.primary),
-                                        ),
+                                        child: const Icon(Icons.add, size: 14, color: AppColors.primary),
                                       ),
                                     ],
                                   ),
@@ -116,7 +80,7 @@ void showCartSheet(BuildContext context) {
                               else
                                 GestureDetector(
                                   onTap: () => cubit.removeLine(line.id),
-                                  child: const AppLabel('Quitar', color: AppColors.error),
+                                  child: const Text('Quitar', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.error)),
                                 ),
                               const SizedBox(width: 10),
                               SizedBox(
@@ -127,38 +91,34 @@ void showCartSheet(BuildContext context) {
                             ],
                           ),
                         );
-                        if (line.isUnit) return row;
-                        // Weight/amount lines: tap to reopen the modal pre-filled, instead of delete-only.
-                        return GestureDetector(
-                          onTap: () => _editLine(context, cubit, line),
-                          child: row,
-                        );
                       },
                     ),
                   ),
                   Container(
                     padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),
-                    decoration: AppDecorations.topDivider(context),
+                    decoration: const BoxDecoration(border: Border(top: BorderSide(color: Color(0x12201F1D)))),
                     child: Column(
                       children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const AppLabel('TOTAL'),
-                            AppTitle(Money.label(state.cartTotal)),
+                            const Text('TOTAL', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: Color(0x99201F1D))),
+                            Text(Money.label(state.cartTotal), style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800)),
                           ],
                         ),
                         const SizedBox(height: 12),
                         SizedBox(
                           width: double.infinity,
-                          child: PrimaryButton(
-                            label: 'COBRAR ${Money.label(state.cartTotal)}',
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, padding: const EdgeInsets.symmetric(vertical: 15)),
                             onPressed: () {
                               Navigator.of(ctx).pop();
                               Navigator.of(context).push(
                                 MaterialPageRoute(builder: (_) => BlocProvider.value(value: cubit, child: const CobrarScreen())),
                               );
                             },
+                            child: Text('COBRAR ${Money.label(state.cartTotal)}',
+                                style: const TextStyle(fontWeight: FontWeight.w800)),
                           ),
                         ),
                       ],

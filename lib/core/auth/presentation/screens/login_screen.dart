@@ -75,9 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       const SizedBox(height: 24),
                       Image.asset('assets/images/logo-full.png', height: 56),
-                      const SizedBox(height: 16),
-                      const AppHeadline('TuColmadoRD'),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 20),
                       const AppDescription('Inicia sesión para gestionar tu colmado.'),
                       const SizedBox(height: 32),
                       AppTextField(
