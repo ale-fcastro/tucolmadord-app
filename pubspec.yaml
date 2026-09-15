@@ -1,7 +1,7 @@
 name: tucolmadord
 description: "TuColmadoRD — punto de venta offline-first para colmados."
 publish_to: 'none'
-version: 0.1.1+2
+version: 0.1.2+3
 
 environment:
   sdk: ^3.13.1
