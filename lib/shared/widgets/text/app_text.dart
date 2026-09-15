@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_text_styles.dart';
 
 /// Headline grande — títulos de pantalla principal.
 class AppHeadline extends StatelessWidget {
@@ -82,5 +83,19 @@ class AppLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = Theme.of(context).textTheme.labelSmall;
     return Text(text, style: color != null ? style?.copyWith(color: color) : style);
+  }
+}
+
+/// Monto/número protagonista — el total a cobrar, la venta del día, el
+/// saldo de un cliente. Un solo tamaño para ese rol en toda la app.
+class AppAmount extends StatelessWidget {
+  const AppAmount(this.text, {super.key, this.color});
+  final String text;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final onBackground = Theme.of(context).colorScheme.onSurface;
+    return Text(text, style: AppTextStyles.displayLarge.copyWith(color: color ?? onBackground));
   }
 }

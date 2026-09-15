@@ -13,9 +13,10 @@ class FiadosState {
   double get totalPending => customers.fold<double>(0, (sum, c) => sum + c.balance);
 
   List<Customer> get visible {
-    if (search.isEmpty) return customers;
     final q = search.toLowerCase();
-    return customers.where((c) => c.name.toLowerCase().contains(q)).toList();
+    final filtered = search.isEmpty ? customers : customers.where((c) => c.name.toLowerCase().contains(q));
+    // Los que más deben aparecen primero; los saldados quedan al final, discretos.
+    return filtered.toList()..sort((a, b) => b.balance.compareTo(a.balance));
   }
 
   FiadosState copyWith({bool? loading, List<Customer>? customers, String? search}) => FiadosState(

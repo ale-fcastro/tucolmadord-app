@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- image_picker: tomar foto para el logo del negocio en Datos del negocio. -->
+    <uses-permission android:name="android.permission.CAMERA"/>
     <application
         android:label="TuColmadoRD"
         android:name="${applicationName}"

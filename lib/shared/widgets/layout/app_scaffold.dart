@@ -11,6 +11,7 @@ class AppScaffold extends StatelessWidget {
     this.actions,
     this.floatingActionButton,
     this.showBackButton = true,
+    this.onBack,
   });
 
   final String title;
@@ -19,12 +20,17 @@ class AppScaffold extends StatelessWidget {
   final Widget? floatingActionButton;
   final bool showBackButton;
 
+  /// Lógica extra a correr al volver (por ejemplo refrescar la pantalla
+  /// anterior) antes del pop. Si no se pasa, se usa el pop automático.
+  final VoidCallback? onBack;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
-        automaticallyImplyLeading: showBackButton,
+        leading: showBackButton && onBack != null ? BackButton(onPressed: onBack) : null,
+        automaticallyImplyLeading: showBackButton && onBack == null,
         actions: actions,
       ),
       body: SafeArea(child: body),

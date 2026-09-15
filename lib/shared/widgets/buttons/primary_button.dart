@@ -8,6 +8,7 @@ class PrimaryButton extends StatelessWidget {
     this.icon,
     this.isLoading = false,
     this.enabled = true,
+    this.color,
   });
 
   final String label;
@@ -16,9 +17,14 @@ class PrimaryButton extends StatelessWidget {
   final bool isLoading;
   final bool enabled;
 
+  /// Color de fondo distinto al primario del theme — por ejemplo el botón
+  /// verde de "día cerrado" en la pantalla de cierre.
+  final Color? color;
+
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
+      style: color != null ? ElevatedButton.styleFrom(backgroundColor: color) : null,
       onPressed: (enabled && !isLoading) ? onPressed : null,
       child: isLoading
           ? const SizedBox(

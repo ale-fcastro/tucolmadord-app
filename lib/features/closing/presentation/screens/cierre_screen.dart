@@ -5,7 +5,11 @@ import '../../../../core/di/service_locator.dart';
 import '../../../../core/utils/money.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../../shared/theme/app_decorations.dart';
-import '../../domain/entities/day_summary.dart';
+import '../../../../shared/widgets/buttons/primary_button.dart';
+import '../../../../shared/widgets/feedback/app_notification.dart';
+import '../../../../shared/widgets/layout/app_card.dart';
+import '../../../../shared/widgets/layout/app_scaffold.dart';
+import '../../../../shared/widgets/text/app_text.dart';
 import '../cubit/closing_cubit.dart';
 
 class CierreScreen extends StatelessWidget {
@@ -23,108 +27,197 @@ class CierreScreen extends StatelessWidget {
 class _CierreView extends StatelessWidget {
   const _CierreView();
 
+  Future<void> _confirmAndClose(BuildContext context, ClosingCubit cubit) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('¿Cerrar el día?'),
+        content: const Text('Esta acción no se puede deshacer.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Cerrar día'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await cubit.closeDay();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
-      body: SafeArea(
-        child: BlocBuilder<ClosingCubit, DaySummary>(
-          builder: (context, summary) {
-            final cubit = context.read<ClosingCubit>();
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(6, 8, 16, 4),
-                  child: Row(
-                    children: [
-                      IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back_ios_new, size: 20)),
-                      const Text('Cierre del día', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
-                    ],
-                  ),
+    return AppScaffold(
+      title: 'Cierre del día',
+      actions: [
+        BlocBuilder<ClosingCubit, ClosingState>(
+          buildWhen: (previous, current) => previous.isSendingEmail != current.isSendingEmail,
+          builder: (context, state) {
+            if (state.isSendingEmail) {
+              return const Padding(
+                padding: EdgeInsets.all(16),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
                 ),
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: AppDecorations.cardShadow),
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Column(
-                          children: [
-                            _Row('Ventas', Money.label(summary.totalSales)),
-                            _Row('Cantidad de ventas', '${summary.salesCount}'),
-                            _Row('Efectivo', Money.label(summary.cashTotal)),
-                            _Row('Transferencias', Money.label(summary.transferTotal)),
-                            _Row('Fiado', Money.label(summary.fiadoTotal)),
-                            _Row('Gastos', Money.label(summary.expensesTotal)),
-                            _Row('Ganancia estimada', Money.label(summary.estimatedProfit), bold: true, color: AppColors.success, last: true),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      if (summary.closed)
-                        Container(
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(color: AppColors.successBg, borderRadius: BorderRadius.circular(16)),
-                          padding: const EdgeInsets.all(18),
-                          child: Column(
-                            children: [
-                              const Icon(Icons.check_circle_outline, size: 34, color: AppColors.success),
-                              const SizedBox(height: 8),
-                              const Text('Día cerrado', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.success)),
-                              const SizedBox(height: 2),
-                              const Text('Esto fue lo que pasó hoy.', style: TextStyle(fontSize: 12.5, color: Color(0x8C201F1D))),
-                              const SizedBox(height: 14),
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.success, padding: const EdgeInsets.symmetric(vertical: 13)),
-                                  onPressed: () => Navigator.of(context).pop(),
-                                  child: const Text('Volver a Inicio', style: TextStyle(fontWeight: FontWeight.w800)),
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      else
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, padding: const EdgeInsets.symmetric(vertical: 16)),
-                            onPressed: cubit.closeDay,
-                            child: const Text('CERRAR DÍA', style: TextStyle(fontWeight: FontWeight.w800)),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ],
+              );
+            }
+            return IconButton(
+              icon: const Icon(Icons.mail_outline),
+              tooltip: 'Enviar reporte por correo',
+              onPressed: () => context.read<ClosingCubit>().sendReportEmail(),
             );
           },
         ),
+      ],
+      body: BlocConsumer<ClosingCubit, ClosingState>(
+        listenWhen: (previous, current) =>
+            (current.errorMessage != null && current.errorMessage != previous.errorMessage) ||
+            (current.successMessage != null && current.successMessage != previous.successMessage),
+        listener: (context, state) {
+          if (state.errorMessage != null) {
+            AppNotification.error(context, state.errorMessage!);
+          }
+          if (state.successMessage != null) {
+            AppNotification.success(context, state.successMessage!);
+          }
+        },
+        builder: (context, state) {
+          if (state.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final cubit = context.read<ClosingCubit>();
+          final summary = state.summary;
+          final profitColor = summary.estimatedProfit >= 0 ? AppColors.success : AppColors.error;
+
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            children: [
+              const AppLabel('VENTAS'),
+              const SizedBox(height: 8),
+              AppCard(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  children: [
+                    _Row('Ventas', Money.label(summary.totalSales)),
+                    _Row('Cantidad de ventas', '${summary.salesCount}', last: true),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              const AppLabel('MÉTODOS DE PAGO'),
+              const SizedBox(height: 8),
+              AppCard(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  children: [
+                    _Row('Efectivo', Money.label(summary.cashTotal)),
+                    _Row('Transferencias', Money.label(summary.transferTotal)),
+                    _Row('Fiado', Money.label(summary.fiadoTotal), last: true),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              const AppLabel('GASTOS Y GANANCIA'),
+              const SizedBox(height: 8),
+              AppCard(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  children: [
+                    _Row('Gastos', Money.label(summary.expensesTotal)),
+                    _HeroRow('Ganancia estimada', Money.label(summary.estimatedProfit), color: profitColor),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              if (summary.closed)
+                AppCard(
+                  color: AppColors.successBg,
+                  padding: const EdgeInsets.all(18),
+                  child: Column(
+                    children: [
+                      const Icon(Icons.check_circle_outline, size: 34, color: AppColors.success),
+                      const SizedBox(height: 8),
+                      const AppSubtitle('Día cerrado', color: AppColors.success),
+                      const SizedBox(height: 2),
+                      const AppLabel('Esto fue lo que pasó hoy.'),
+                      const SizedBox(height: 14),
+                      SizedBox(
+                        width: double.infinity,
+                        child: PrimaryButton(
+                          label: 'Volver a Inicio',
+                          color: AppColors.success,
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                SizedBox(
+                  width: double.infinity,
+                  child: PrimaryButton(
+                    label: 'CERRAR DÍA',
+                    isLoading: state.isClosing,
+                    onPressed: () => _confirmAndClose(context, cubit),
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }
 }
 
 class _Row extends StatelessWidget {
-  const _Row(this.label, this.value, {this.bold = false, this.color, this.last = false});
+  const _Row(this.label, this.value, {this.last = false});
   final String label;
   final String value;
-  final bool bold;
-  final Color? color;
   final bool last;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: last ? null : const BoxDecoration(border: Border(bottom: BorderSide(color: Color(0x0F201F1D)))),
+      decoration: last ? null : AppDecorations.rowDivider(context),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(fontSize: 13.5, fontWeight: bold ? FontWeight.w700 : FontWeight.w400, color: bold ? null : const Color(0x99201F1D))),
-          Text(value, style: TextStyle(fontSize: bold ? 16 : 14.5, fontWeight: FontWeight.w700, color: color)),
+          AppLabel(label),
+          AppSubtitle(value),
+        ],
+      ),
+    );
+  }
+}
+
+/// Fila protagonista para el resultado neto del día ("Ganancia estimada") —
+/// usa AppAmount en vez de AppTitle para que el número domine visualmente,
+/// como el resto de los números "hero" de la app.
+class _HeroRow extends StatelessWidget {
+  const _HeroRow(this.label, this.value, {this.color});
+  final String label;
+  final String value;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AppSubtitle(label),
+          const SizedBox(height: 4),
+          AppAmount(value, color: color),
         ],
       ),
     );

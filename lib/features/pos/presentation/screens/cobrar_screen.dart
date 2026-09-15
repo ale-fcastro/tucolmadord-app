@@ -3,113 +3,116 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/utils/money.dart';
 import '../../../../shared/theme/app_colors.dart';
-import '../../../../shared/theme/app_decorations.dart';
+import '../../../../shared/widgets/buttons/primary_button.dart';
+import '../../../../shared/widgets/buttons/selectable_chip.dart';
+import '../../../../shared/widgets/feedback/app_notification.dart';
+import '../../../../shared/widgets/layout/app_card.dart';
+import '../../../../shared/widgets/layout/app_scaffold.dart';
+import '../../../../shared/widgets/text/app_text.dart';
 import '../../domain/entities/sale.dart';
 import '../cubit/pos_cubit.dart';
 import '../cubit/pos_state.dart';
 import 'sale_complete_screen.dart';
 
-class CobrarScreen extends StatelessWidget {
+class CobrarScreen extends StatefulWidget {
   const CobrarScreen({super.key});
+
+  @override
+  State<CobrarScreen> createState() => _CobrarScreenState();
+}
+
+class _CobrarScreenState extends State<CobrarScreen> {
+  bool _confirming = false;
+
+  Future<void> _confirmSale(PosCubit cubit) async {
+    setState(() => _confirming = true);
+    try {
+      await cubit.confirmSale();
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => BlocProvider.value(value: cubit, child: const SaleCompleteScreen())),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      AppNotification.error(context, 'No se pudo completar la venta. Intenta de nuevo.');
+    } finally {
+      if (mounted) setState(() => _confirming = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<PosCubit>();
-    return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
-      body: SafeArea(
-        child: BlocBuilder<PosCubit, PosState>(
-          builder: (context, state) {
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(6, 8, 16, 4),
+    return AppScaffold(
+      title: 'Cobrar',
+      body: BlocBuilder<PosCubit, PosState>(
+        builder: (context, state) {
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 18),
+                child: Column(
+                  children: [
+                    const AppLabel('Total a cobrar'),
+                    AppAmount(Money.label(state.cartTotal)),
+                    AppLabel('${state.cartCount} artículos'),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: AppCard(
+                  padding: const EdgeInsets.all(5),
                   child: Row(
                     children: [
-                      IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back_ios_new, size: 20)),
-                      const Text('Cobrar', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 18),
-                  child: Column(
-                    children: [
-                      const Text('Total a cobrar', style: TextStyle(fontSize: 12.5, color: Color(0x8C201F1D))),
-                      Text(Money.label(state.cartTotal), style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w800)),
-                      Text('${state.cartCount} artículos', style: const TextStyle(fontSize: 12.5, color: Color(0x80201F1D))),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Container(
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), boxShadow: AppDecorations.cardShadow),
-                    padding: const EdgeInsets.all(5),
-                    child: Row(
-                      children: [
-                        _MethodTab(
-                          label: 'Efectivo',
-                          selected: state.paymentMethod == PaymentMethod.efectivo,
-                          onTap: () => cubit.selectPaymentMethod(PaymentMethod.efectivo),
-                        ),
-                        _MethodTab(
-                          label: 'Transferencia',
-                          selected: state.paymentMethod == PaymentMethod.transferencia,
-                          onTap: () => cubit.selectPaymentMethod(PaymentMethod.transferencia),
-                        ),
-                        _MethodTab(
-                          label: 'Fiado',
-                          selected: state.paymentMethod == PaymentMethod.fiado,
-                          onTap: () => cubit.selectPaymentMethod(PaymentMethod.fiado),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                    child: switch (state.paymentMethod) {
-                      PaymentMethod.efectivo => _EfectivoSection(state: state, cubit: cubit),
-                      PaymentMethod.transferencia => Container(
-                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), boxShadow: AppDecorations.cardShadow),
-                          padding: const EdgeInsets.all(16),
-                          child: Text(
-                            'Confirma cuando recibas la transferencia por ${Money.label(state.cartTotal)}.',
-                            style: const TextStyle(fontSize: 13, color: Color(0x99201F1D), height: 1.5),
-                          ),
-                        ),
-                      PaymentMethod.fiado => _FiadoSection(state: state, cubit: cubit),
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: state.canConfirmPayment ? AppColors.primary : const Color(0xFFCBD3E8),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      _MethodTab(
+                        label: 'Efectivo',
+                        selected: state.paymentMethod == PaymentMethod.efectivo,
+                        onTap: () => cubit.selectPaymentMethod(PaymentMethod.efectivo),
                       ),
-                      onPressed: state.canConfirmPayment
-                          ? () async {
-                              await cubit.confirmSale();
-                              if (!context.mounted) return;
-                              Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(builder: (_) => BlocProvider.value(value: cubit, child: const SaleCompleteScreen())),
-                              );
-                            }
-                          : null,
-                      child: const Text('CONFIRMAR COBRO', style: TextStyle(fontWeight: FontWeight.w800)),
-                    ),
+                      _MethodTab(
+                        label: 'Transferencia',
+                        selected: state.paymentMethod == PaymentMethod.transferencia,
+                        onTap: () => cubit.selectPaymentMethod(PaymentMethod.transferencia),
+                      ),
+                      _MethodTab(
+                        label: 'Fiado',
+                        selected: state.paymentMethod == PaymentMethod.fiado,
+                        onTap: () => cubit.selectPaymentMethod(PaymentMethod.fiado),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            );
-          },
-        ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: switch (state.paymentMethod) {
+                    PaymentMethod.efectivo => _EfectivoSection(state: state, cubit: cubit),
+                    PaymentMethod.transferencia => AppCard(
+                        child: AppDescription(
+                          'Confirma cuando recibas la transferencia por ${Money.label(state.cartTotal)}.',
+                        ),
+                      ),
+                    PaymentMethod.fiado => _FiadoSection(state: state, cubit: cubit),
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: PrimaryButton(
+                    label: 'CONFIRMAR COBRO',
+                    enabled: state.canConfirmPayment,
+                    isLoading: _confirming,
+                    onPressed: () => _confirmSale(cubit),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -123,6 +126,7 @@ class _MethodTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -131,25 +135,64 @@ class _MethodTab extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(color: selected ? AppColors.primary : Colors.transparent, borderRadius: BorderRadius.circular(11)),
           child: Text(label,
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: selected ? Colors.white : const Color(0xFF201F1D))),
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(color: selected ? AppColors.onPrimary : onSurface)),
         ),
       ),
     );
   }
 }
 
-class _EfectivoSection extends StatelessWidget {
+class _EfectivoSection extends StatefulWidget {
   const _EfectivoSection({required this.state, required this.cubit});
   final PosState state;
   final PosCubit cubit;
 
   @override
+  State<_EfectivoSection> createState() => _EfectivoSectionState();
+}
+
+class _EfectivoSectionState extends State<_EfectivoSection> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: _formatAmount(widget.state.receivedAmount));
+  }
+
+  @override
+  void didUpdateWidget(covariant _EfectivoSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Solo sincroniza cuando el monto cambió por una fuente externa (p.ej.
+    // un chip de monto rápido) — si el cambio vino del propio campo, el
+    // texto del controller ya coincide con el estado y no lo tocamos, para
+    // no perder la posición del cursor en cada tecla.
+    final controllerValue = double.tryParse(_controller.text) ?? 0;
+    if (controllerValue != widget.state.receivedAmount) {
+      _controller.text = _formatAmount(widget.state.receivedAmount);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  String _formatAmount(double amount) => amount > 0 ? amount.toStringAsFixed(0) : '';
+
+  @override
   Widget build(BuildContext context) {
+    final state = widget.state;
+    final cubit = widget.cubit;
     final quick = [state.cartTotal, 100, 200, 500];
+    final changeDue = state.changeDue;
+    final insufficient = state.isPaymentInsufficient;
+    final changeColor = insufficient ? AppColors.error : (changeDue > 0 ? AppColors.success : null);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Monto recibido', style: TextStyle(fontSize: 12.5, color: Color(0x8C201F1D))),
+        const AppLabel('Monto recibido'),
         const SizedBox(height: 8),
         GridView.count(
           crossAxisCount: 4,
@@ -160,25 +203,20 @@ class _EfectivoSection extends StatelessWidget {
           childAspectRatio: 1.6,
           children: quick.map((v) {
             final selected = state.receivedAmount == v;
-            return GestureDetector(
+            return SelectableChip(
+              label: Money.label(v),
+              selected: selected,
               onTap: () => cubit.setReceivedAmount(v.toDouble()),
-              child: Container(
-                alignment: Alignment.center,
-                decoration: BoxDecoration(color: selected ? AppColors.primary : Colors.white, borderRadius: BorderRadius.circular(11), boxShadow: AppDecorations.cardShadow),
-                child: Text(Money.label(v), style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: selected ? Colors.white : const Color(0xFF201F1D))),
-              ),
             );
           }).toList(),
         ),
         const SizedBox(height: 14),
-        const Text('Otro monto', style: TextStyle(fontSize: 12.5, color: Color(0x8C201F1D))),
+        const AppLabel('Otro monto'),
         const SizedBox(height: 6),
-        Container(
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(13), boxShadow: AppDecorations.cardShadow),
+        AppCard(
           padding: const EdgeInsets.symmetric(horizontal: 14),
           child: TextField(
-            key: ValueKey(state.receivedAmount),
-            controller: TextEditingController(text: state.receivedAmount > 0 ? state.receivedAmount.toStringAsFixed(0) : ''),
+            controller: _controller,
             keyboardType: TextInputType.number,
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
             decoration: const InputDecoration(border: InputBorder.none, prefixText: 'RD\$  ', hintText: '0'),
@@ -186,14 +224,16 @@ class _EfectivoSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 14),
-        Container(
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(13), boxShadow: AppDecorations.cardShadow),
+        AppCard(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Cambio', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: Color(0x8C201F1D))),
-              Text(Money.label(state.changeAmount), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.success)),
+              AppLabel(insufficient ? 'Falta' : 'Cambio'),
+              AppAmount(
+                Money.label(insufficient ? -changeDue : changeDue),
+                color: changeColor,
+              ),
             ],
           ),
         ),
@@ -212,29 +252,27 @@ class _FiadoSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Selecciona el cliente', style: TextStyle(fontSize: 12.5, color: Color(0x8C201F1D))),
+        const AppLabel('Selecciona el cliente'),
         const SizedBox(height: 8),
         ...state.customers.map((c) {
           final selected = state.selectedCustomerId == c.id;
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
-            child: GestureDetector(
+            child: AppCard(
+              color: selected ? AppColors.infoBg : null,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
               onTap: () => cubit.selectCustomer(c.id),
-              child: Container(
-                decoration: BoxDecoration(color: selected ? AppColors.infoBg : Colors.white, borderRadius: BorderRadius.circular(13), boxShadow: AppDecorations.cardShadow),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 17,
-                      backgroundColor: AppColors.fiadoBg,
-                      child: Text(c.initial, style: const TextStyle(color: AppColors.fiado, fontWeight: FontWeight.w700, fontSize: 13)),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(child: Text(c.name, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600))),
-                    if (selected) const Icon(Icons.check_circle, color: AppColors.primary, size: 18),
-                  ],
-                ),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 17,
+                    backgroundColor: AppColors.fiadoBg,
+                    child: Text(c.initial, style: const TextStyle(color: AppColors.fiado, fontWeight: FontWeight.w700, fontSize: 13)),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(child: AppSubtitle(c.name)),
+                  if (selected) const Icon(Icons.check_circle, color: AppColors.primary, size: 18),
+                ],
               ),
             ),
           );

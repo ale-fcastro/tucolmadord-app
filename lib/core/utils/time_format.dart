@@ -14,3 +14,21 @@ String relativeLabel(DateTime dt) {
   if (diff.inHours < 24) return 'Hace ${diff.inHours} h';
   return timeLabel(dt);
 }
+
+const _shortMonths = [
+  'ene', 'feb', 'mar', 'abr', 'may', 'jun',
+  'jul', 'ago', 'sep', 'oct', 'nov', 'dic',
+];
+
+/// "11 sep" — para encabezados de grupo en listas de historial.
+String shortDateLabel(DateTime dt) => '${dt.day} ${_shortMonths[dt.month - 1]}';
+
+/// "Hoy, 3:45 PM" / "Ayer, 3:45 PM" / "11 sep, 3:45 PM" — para filas de
+/// historial donde solo la hora (timeLabel) no basta para saber cuándo fue.
+String dateTimeLabel(DateTime dt) {
+  final now = DateTime.now();
+  bool sameDay(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
+  if (sameDay(dt, now)) return 'Hoy, ${timeLabel(dt)}';
+  if (sameDay(dt, now.subtract(const Duration(days: 1)))) return 'Ayer, ${timeLabel(dt)}';
+  return '${shortDateLabel(dt)}, ${timeLabel(dt)}';
+}

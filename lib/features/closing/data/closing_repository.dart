@@ -1,5 +1,11 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
+import '../../../core/auth/data/auth_exceptions.dart';
+import '../../../core/auth/data/auth_session.dart';
+import '../../../core/config/api_config.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/database/sync_queue.dart';
 import '../domain/entities/day_summary.dart';
@@ -13,8 +19,12 @@ String _todayKey() {
 
 class ClosingRepository {
   final AppDatabase _appDatabase;
+  final AuthSessionStore _session;
+  final http.Client _client;
 
-  ClosingRepository(this._appDatabase);
+  static const _timeout = Duration(seconds: 20);
+
+  ClosingRepository(this._appDatabase, this._session, {http.Client? client}) : _client = client ?? http.Client();
 
   Future<DaySummary> getTodaySummary() async {
     final db = await _appDatabase.database;
@@ -91,5 +101,44 @@ class ClosingRepository {
         payload: closing,
       );
     });
+  }
+
+  /// Pide al backend que envíe por correo el reporte de cierre del día al
+  /// dueño autenticado. El backend recalcula el resumen a partir de lo ya
+  /// sincronizado — no se manda el `DaySummary` local — así que solo tiene
+  /// sentido después de que las ventas del día hayan sincronizado.
+  Future<void> sendReportEmail() async {
+    final session = await _session.load();
+    final response = await _client
+        .post(
+          Uri.parse('${ApiConfig.baseUrl}/reports/closing/email'),
+          headers: {
+            'Content-Type': 'application/json',
+            if (session != null) 'Authorization': 'Bearer ${session.token}',
+          },
+          body: jsonEncode({'date': _todayKey()}),
+        )
+        .timeout(_timeout);
+
+    if (response.statusCode == 200) return;
+
+    final body = _decode(response);
+    throw ApiException(_message(body) ?? 'No se pudo enviar el reporte (${response.statusCode}).');
+  }
+
+  Map<String, dynamic> _decode(http.Response response) {
+    if (response.body.isEmpty) return const {};
+    try {
+      final decoded = jsonDecode(response.body);
+      if (decoded is Map<String, dynamic>) return decoded;
+      return const {};
+    } catch (_) {
+      return const {};
+    }
+  }
+
+  String? _message(Map<String, dynamic> body) {
+    final message = body['message'];
+    return (message is String && message.isNotEmpty) ? message : null;
   }
 }

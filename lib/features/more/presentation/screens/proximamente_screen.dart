@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../shared/theme/app_colors.dart';
+import '../../../../shared/widgets/layout/app_empty_state.dart';
+import '../../../../shared/widgets/layout/app_scaffold.dart';
 
 /// Placeholder para secciones que todavía no se implementan (reportes con
 /// envío por correo, configuración, etc.) — evita rutas rotas mientras el
@@ -11,27 +12,13 @@ class ProximamenteScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(6, 8, 16, 4),
-              child: Row(
-                children: [
-                  IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back_ios_new, size: 20)),
-                  Text(title, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
-                ],
-              ),
-            ),
-            const Expanded(
-              child: Center(
-                child: Text('Próximamente', style: TextStyle(fontSize: 14, color: Color(0x8C201F1D))),
-              ),
-            ),
-          ],
-        ),
+    return AppScaffold(
+      title: title,
+      body: AppEmptyState(
+        message: '$title estará disponible pronto',
+        icon: Icons.hourglass_empty,
+        actionLabel: 'Volver',
+        onAction: () => Navigator.pop(context),
       ),
     );
   }

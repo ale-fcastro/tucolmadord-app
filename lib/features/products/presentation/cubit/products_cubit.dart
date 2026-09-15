@@ -57,4 +57,9 @@ class ProductsCubit extends Cubit<ProductsState> {
     await _repository.insert(product);
     await load();
   }
+
+  Future<void> updateProduct(Product product) async {
+    await _repository.update(product);
+    await load();
+  }
 }

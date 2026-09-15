@@ -26,6 +26,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Se usa la cámara para tomar una foto del logo de tu negocio para la factura.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Se usa tu galería para elegir el logo de tu negocio para la factura.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -1,15 +1,64 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/products/entities/product.dart';
 import '../../../../core/utils/money.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../../shared/theme/app_decorations.dart';
+import '../../../../shared/widgets/buttons/selectable_chip.dart';
+import '../../../../shared/widgets/layout/app_empty_state.dart';
+import '../../../../shared/widgets/text/app_text.dart';
 import '../cubit/products_cubit.dart';
 import '../cubit/products_state.dart';
 import 'product_new_screen.dart';
 
-class InventarioScreen extends StatelessWidget {
+class InventarioScreen extends StatefulWidget {
   const InventarioScreen({super.key});
+
+  @override
+  State<InventarioScreen> createState() => _InventarioScreenState();
+}
+
+class _InventarioScreenState extends State<InventarioScreen> {
+  final _searchCtrl = TextEditingController();
+  Timer? _debounce;
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged(BuildContext context, String value) {
+    setState(() {}); // refresh clear-button visibility immediately
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 280), () {
+      context.read<ProductsCubit>().setSearch(value);
+    });
+  }
+
+  void _clearFilters(BuildContext context) {
+    _debounce?.cancel();
+    _searchCtrl.clear();
+    context.read<ProductsCubit>()
+      ..setSearch('')
+      ..setFilter(ProductsFilter.all);
+    setState(() {});
+  }
+
+  void _openProduct(BuildContext context, {Product? product}) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => BlocProvider.value(
+          value: context.read<ProductsCubit>(),
+          child: ProductNewScreen(product: product),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,18 +72,9 @@ class InventarioScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
                   child: Row(
                     children: [
-                      const Expanded(
-                        child: Text('Inventario', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
-                      ),
+                      const Expanded(child: AppHeadline('Inventario')),
                       ElevatedButton(
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => BlocProvider.value(
-                              value: context.read<ProductsCubit>(),
-                              child: const ProductNewScreen(),
-                            ),
-                          ),
-                        ),
+                        onPressed: () => _openProduct(context),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
                         ),
@@ -45,15 +85,34 @@ class InventarioScreen extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  // AppSearchField doesn't expose a controller or a suffix slot, and
+                  // it isn't owned by this agent, so the debounced+clearable search
+                  // box is built locally here, matching its visual style.
                   child: Container(
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(13), boxShadow: AppDecorations.cardShadow),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(AppDecorations.radius),
+                      boxShadow: AppDecorations.cardShadow,
+                    ),
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: TextField(
-                      onChanged: context.read<ProductsCubit>().setSearch,
-                      decoration: const InputDecoration(
+                      controller: _searchCtrl,
+                      onChanged: (value) => _onSearchChanged(context, value),
+                      decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Buscar producto...',
-                        prefixIcon: Icon(Icons.search, size: 20),
+                        prefixIcon: const Icon(Icons.search, size: 20),
+                        suffixIcon: _searchCtrl.text.isEmpty
+                            ? null
+                            : IconButton(
+                                icon: const Icon(Icons.clear, size: 18),
+                                onPressed: () {
+                                  _debounce?.cancel();
+                                  _searchCtrl.clear();
+                                  context.read<ProductsCubit>().setSearch('');
+                                  setState(() {});
+                                },
+                              ),
                       ),
                     ),
                   ),
@@ -65,23 +124,32 @@ class InventarioScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       scrollDirection: Axis.horizontal,
                       children: [
-                        _FilterChip(
-                          label: 'Todos',
-                          selected: state.filter == ProductsFilter.all,
-                          onTap: () => context.read<ProductsCubit>().setFilter(ProductsFilter.all),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: SelectableChip(
+                            label: 'Todos (${state.allCount})',
+                            selected: state.filter == ProductsFilter.all,
+                            onTap: () => context.read<ProductsCubit>().setFilter(ProductsFilter.all),
+                          ),
                         ),
-                        _FilterChip(
-                          label: 'Bajo stock',
-                          selected: state.filter == ProductsFilter.lowStock,
-                          onTap: () => context.read<ProductsCubit>().setFilter(ProductsFilter.lowStock),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: SelectableChip(
+                            label: 'Bajo stock (${state.lowStockCount})',
+                            selected: state.filter == ProductsFilter.lowStock,
+                            onTap: () => context.read<ProductsCubit>().setFilter(ProductsFilter.lowStock),
+                          ),
                         ),
-                        _FilterChip(
-                          label: 'Sin stock',
-                          selected: state.filter == ProductsFilter.outOfStock,
-                          onTap: () => context.read<ProductsCubit>().setFilter(ProductsFilter.outOfStock),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: SelectableChip(
+                            label: 'Sin stock (${state.outOfStockCount})',
+                            selected: state.filter == ProductsFilter.outOfStock,
+                            onTap: () => context.read<ProductsCubit>().setFilter(ProductsFilter.outOfStock),
+                          ),
                         ),
-                        _FilterChip(
-                          label: 'Sin control',
+                        SelectableChip(
+                          label: 'Sin control (${state.untrackedCount})',
                           selected: state.filter == ProductsFilter.untracked,
                           onTap: () => context.read<ProductsCubit>().setFilter(ProductsFilter.untracked),
                         ),
@@ -92,8 +160,20 @@ class InventarioScreen extends StatelessWidget {
                 Expanded(
                   child: switch (state) {
                     ProductsLoading() => const Center(child: CircularProgressIndicator()),
-                    ProductsLoaded(:final visible) => visible.isEmpty
-                        ? const Center(child: Text('Sin productos'))
+                    ProductsLoaded(:final visible, :final all) => visible.isEmpty
+                        ? (all.isEmpty
+                            ? AppEmptyState(
+                                message: 'Sin productos aún — agrega el primero',
+                                icon: Icons.add_box_outlined,
+                                actionLabel: 'Agregar producto',
+                                onAction: () => _openProduct(context),
+                              )
+                            : AppEmptyState(
+                                message: 'Sin resultados para tu búsqueda',
+                                icon: Icons.search_off,
+                                actionLabel: 'Limpiar filtros',
+                                onAction: () => _clearFilters(context),
+                              ))
                         : ListView.builder(
                             padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
                             itemCount: visible.length,
@@ -103,53 +183,69 @@ class InventarioScreen extends StatelessWidget {
                                 _ when p.price != null => Money.label(p.price!),
                                 _ => 'Precio variable',
                               };
+                              final stockDecimals = p.mode == SellMode.weight ? 1 : 0;
                               final String stockLabel;
                               final Color stockColor;
                               final Color stockBg;
                               if (!p.trackStock) {
                                 stockLabel = 'Sin control';
                                 stockColor = const Color(0xFF5B564E);
-                                stockBg = const Color(0xFFF6F1E8);
+                                stockBg = AppColors.backgroundLight;
                               } else if (p.isOutOfStock) {
                                 stockLabel = 'Sin stock';
                                 stockColor = AppColors.error;
                                 stockBg = AppColors.errorBg;
                               } else if (p.isLowStock) {
-                                stockLabel = 'Stock: ${p.stock!.toStringAsFixed(0)}';
+                                stockLabel = 'Stock: ${p.stock!.toStringAsFixed(stockDecimals)}';
                                 stockColor = AppColors.warning;
                                 stockBg = AppColors.warningBg;
                               } else {
-                                stockLabel = 'Stock: ${p.stock?.toStringAsFixed(0) ?? '-'}';
+                                stockLabel = 'Stock: ${p.stock?.toStringAsFixed(stockDecimals) ?? '-'}';
                                 stockColor = AppColors.success;
                                 stockBg = AppColors.successBg;
                               }
-                              return Container(
-                                margin: const EdgeInsets.only(bottom: 1),
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                decoration: const BoxDecoration(
-                                  border: Border(bottom: BorderSide(color: Color(0x0F201F1D))),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(p.name, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600)),
-                                          const SizedBox(height: 2),
-                                          Text(priceLabel, style: const TextStyle(fontSize: 12.5, color: Color(0x80201F1D))),
-                                        ],
+                              return InkWell(
+                                onTap: () => _openProduct(context, product: p),
+                                child: Container(
+                                  margin: const EdgeInsets.only(bottom: 1),
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  decoration: AppDecorations.rowDivider(context),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            AppSubtitle(p.name),
+                                            const SizedBox(height: 2),
+                                            Row(
+                                              children: [
+                                                AppLabel(priceLabel),
+                                                if (p.category.isNotEmpty) ...[
+                                                  const Text(' · ', style: TextStyle(color: Color(0xFF9A948A), fontSize: 11.5)),
+                                                  Flexible(
+                                                    child: Text(
+                                                      p.category,
+                                                      overflow: TextOverflow.ellipsis,
+                                                      style: const TextStyle(color: Color(0xFF9A948A), fontSize: 11.5),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ],
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                      decoration: BoxDecoration(color: stockBg, borderRadius: BorderRadius.circular(8)),
-                                      child: Text(
-                                        stockLabel,
-                                        style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: stockColor),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                        decoration: BoxDecoration(color: stockBg, borderRadius: BorderRadius.circular(AppDecorations.radius)),
+                                        child: Text(
+                                          stockLabel,
+                                          style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: stockColor),
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               );
                             },
@@ -159,41 +255,6 @@ class InventarioScreen extends StatelessWidget {
               ],
             );
           },
-        ),
-      ),
-    );
-  }
-}
-
-class _FilterChip extends StatelessWidget {
-  const _FilterChip({required this.label, required this.selected, required this.onTap});
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          decoration: BoxDecoration(
-            color: selected ? AppColors.primary : Colors.white,
-            borderRadius: BorderRadius.circular(11),
-            boxShadow: AppDecorations.cardShadow,
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w700,
-              color: selected ? Colors.white : const Color(0xFF201F1D),
-            ),
-          ),
         ),
       ),
     );

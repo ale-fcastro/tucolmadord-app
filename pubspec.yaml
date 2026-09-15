@@ -1,7 +1,7 @@
 name: tucolmadord
 description: "TuColmadoRD — punto de venta offline-first para colmados."
 publish_to: 'none'
-version: 0.1.0+1
+version: 0.1.1+2
 
 environment:
   sdk: ^3.13.1
@@ -15,6 +15,11 @@ dependencies:
   sqflite_common_ffi_web: ^1.1.3
   path: ^1.9.0
   uuid: ^4.5.1
+  http: ^1.2.2
+  flutter_secure_storage: ^9.2.2
+  image_picker: ^1.1.2
+  pdf: ^3.11.1
+  printing: ^5.13.4
 
 dev_dependencies:
   flutter_test:

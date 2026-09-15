@@ -5,8 +5,14 @@ import '../../../../core/customers/entities/customer.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/customers/customers_repository.dart';
 import '../../../../core/utils/money.dart';
+import '../../../../core/utils/time_format.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../../shared/theme/app_decorations.dart';
+import '../../../../shared/widgets/buttons/primary_button.dart';
+import '../../../../shared/widgets/layout/app_card.dart';
+import '../../../../shared/widgets/layout/app_empty_state.dart';
+import '../../../../shared/widgets/layout/app_scaffold.dart';
+import '../../../../shared/widgets/text/app_text.dart';
 import '../cubit/fiado_detail_cubit.dart';
 import '../cubit/fiados_cubit.dart';
 import '../widgets/pago_modal.dart';
@@ -39,82 +45,84 @@ class _FiadoDetailView extends StatelessWidget {
           return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
         final customer = state.customer!;
-        return Scaffold(
-          backgroundColor: AppColors.backgroundLight,
-          body: SafeArea(
-            child: Column(
+        return PopScope(
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) parentCubit.load();
+          },
+          child: AppScaffold(
+            title: customer.name,
+            body: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(6, 8, 16, 4),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          parentCubit.load();
-                          Navigator.of(context).pop();
-                        },
-                        icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-                      ),
-                      Text(customer.name, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
-                    ],
-                  ),
-                ),
                 Expanded(
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                     children: [
-                      Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: AppDecorations.cardShadow),
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          children: [
-                            const Text('Te debe', style: TextStyle(fontSize: 12.5, color: Color(0x8C201F1D))),
-                            Text(
-                              Money.label(customer.balance),
-                              style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: customer.balance > 0 ? AppColors.error : AppColors.success),
-                            ),
-                          ],
+                      AppCard(
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: Column(
+                            children: [
+                              const AppLabel('Te debe'),
+                              AppAmount(
+                                Money.label(customer.balance),
+                                color: customer.balance > 0 ? AppColors.error : AppColors.success,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Text('Historial', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                      const AppSubtitle('Historial'),
                       const SizedBox(height: 8),
-                      Container(
-                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), boxShadow: AppDecorations.cardShadow),
-                        padding: const EdgeInsets.symmetric(horizontal: 14),
-                        child: Column(
-                          children: state.movements.isEmpty
-                              ? [const Padding(padding: EdgeInsets.symmetric(vertical: 16), child: Text('Sin movimientos', style: TextStyle(color: Color(0x80201F1D))))]
-                              : state.movements.map((m) {
+                      state.movements.isEmpty
+                          ? const AppEmptyState(
+                              message: 'Sin movimientos todavía',
+                              icon: Icons.receipt_long_outlined,
+                            )
+                          : AppCard(
+                              padding: const EdgeInsets.symmetric(horizontal: 14),
+                              child: Column(
+                                children: state.movements.map((m) {
                                   final isPago = m.type == FiadoMovementType.pago;
                                   return Container(
                                     padding: const EdgeInsets.symmetric(vertical: 10),
-                                    decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Color(0x0F201F1D)))),
+                                    decoration: AppDecorations.rowDivider(context),
                                     child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Expanded(child: Text(m.note ?? (isPago ? 'Pago recibido' : 'Compra'), style: const TextStyle(fontSize: 13))),
-                                        Text(
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              AppDescription(m.note ?? (isPago ? 'Pago recibido' : 'Compra')),
+                                              const SizedBox(height: 2),
+                                              AppLabel(
+                                                dateTimeLabel(m.createdAt),
+                                                color: Theme.of(context).colorScheme.outline,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        AppSubtitle(
                                           '${isPago ? '−' : '+'}${Money.label(m.amount)}',
-                                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: isPago ? AppColors.success : AppColors.error),
+                                          color: isPago ? AppColors.success : AppColors.error,
                                         ),
                                       ],
                                     ),
                                   );
                                 }).toList(),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, padding: const EdgeInsets.symmetric(vertical: 15)),
-                          onPressed: () => showPagoModal(context, cubit),
-                          child: const Text('REGISTRAR PAGO', style: TextStyle(fontWeight: FontWeight.w800)),
-                        ),
-                      ),
+                              ),
+                            ),
                     ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                  decoration: AppDecorations.topDivider(context).copyWith(color: Theme.of(context).colorScheme.surface),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: PrimaryButton(label: 'REGISTRAR PAGO', onPressed: () => showPagoModal(context, cubit)),
                   ),
                 ),
               ],

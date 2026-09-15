@@ -31,6 +31,10 @@ class ActivityItem {
       };
 }
 
+/// Sentinel used by [HomeState.copyWith] so `error` can be explicitly reset
+/// to null (a plain `error ?? this.error` would never allow clearing it).
+const Object _unsetError = Object();
+
 class HomeState {
   final bool loading;
   final double todaySales;
@@ -39,6 +43,12 @@ class HomeState {
   final double todayExpenses;
   final int lowStockCount;
   final List<ActivityItem> recentActivity;
+  final String? error;
+
+  /// True once a load() call has completed successfully at least once.
+  /// Used to avoid blanking the screen (spinner or error state) on a
+  /// background refresh when we already have data to show.
+  final bool hasLoadedOnce;
 
   const HomeState({
     this.loading = true,
@@ -48,6 +58,8 @@ class HomeState {
     this.todayExpenses = 0,
     this.lowStockCount = 0,
     this.recentActivity = const [],
+    this.error,
+    this.hasLoadedOnce = false,
   });
 
   HomeState copyWith({
@@ -58,6 +70,8 @@ class HomeState {
     double? todayExpenses,
     int? lowStockCount,
     List<ActivityItem>? recentActivity,
+    Object? error = _unsetError,
+    bool? hasLoadedOnce,
   }) {
     return HomeState(
       loading: loading ?? this.loading,
@@ -67,6 +81,8 @@ class HomeState {
       todayExpenses: todayExpenses ?? this.todayExpenses,
       lowStockCount: lowStockCount ?? this.lowStockCount,
       recentActivity: recentActivity ?? this.recentActivity,
+      error: identical(error, _unsetError) ? this.error : error as String?,
+      hasLoadedOnce: hasLoadedOnce ?? this.hasLoadedOnce,
     );
   }
 }

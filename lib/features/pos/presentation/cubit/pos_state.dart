@@ -33,6 +33,15 @@ class PosState {
   bool get cartHasItems => cart.isNotEmpty;
   double get changeAmount => (receivedAmount - cartTotal).clamp(0, double.infinity);
 
+  /// Diferencia real entre lo recibido y el total, sin recortar — negativa
+  /// cuando el cliente paga de menos. Úsese para mostrar en pantalla; para
+  /// persistir la venta se sigue usando [changeAmount] (nunca negativo).
+  double get changeDue => receivedAmount - cartTotal;
+
+  /// true cuando el pago en efectivo es insuficiente para cubrir el total.
+  bool get isPaymentInsufficient =>
+      paymentMethod == PaymentMethod.efectivo && receivedAmount < cartTotal;
+
   List<Product> get visibleProducts {
     var list = products;
     if (search.isNotEmpty) {

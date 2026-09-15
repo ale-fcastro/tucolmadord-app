@@ -37,28 +37,34 @@ class Product {
   bool get isLowStock => trackStock && stock != null && minStock != null && stock! <= minStock!;
   bool get isOutOfStock => trackStock && stock != null && stock! <= 0;
 
+  static const _unset = Object();
+
+  /// Los campos nullable (price, cost, stock, minStock) usan un sentinel para
+  /// poder limpiarlos explícitamente a null (ej. al cambiar a modo "importe",
+  /// donde price debe quedar null) — omitir el parámetro conserva el valor
+  /// actual, pasar `null` explícito lo limpia.
   Product copyWith({
     String? name,
-    double? price,
-    double? cost,
+    Object? price = _unset,
+    Object? cost = _unset,
     SellMode? mode,
     String? category,
     bool? isFrequent,
     bool? trackStock,
-    double? stock,
-    double? minStock,
+    Object? stock = _unset,
+    Object? minStock = _unset,
   }) {
     return Product(
       id: id,
       name: name ?? this.name,
-      price: price ?? this.price,
-      cost: cost ?? this.cost,
+      price: identical(price, _unset) ? this.price : price as double?,
+      cost: identical(cost, _unset) ? this.cost : cost as double?,
       mode: mode ?? this.mode,
       category: category ?? this.category,
       isFrequent: isFrequent ?? this.isFrequent,
       trackStock: trackStock ?? this.trackStock,
-      stock: stock ?? this.stock,
-      minStock: minStock ?? this.minStock,
+      stock: identical(stock, _unset) ? this.stock : stock as double?,
+      minStock: identical(minStock, _unset) ? this.minStock : minStock as double?,
       createdAt: createdAt,
       updatedAt: DateTime.now(),
     );

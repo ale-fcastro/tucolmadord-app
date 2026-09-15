@@ -23,10 +23,16 @@ class ExpensesCubit extends Cubit<ExpensesState> {
   }
 
   Future<void> load() async {
-    final today = await _repository.getToday();
-    emit(state.copyWith(loading: false, today: today));
+    try {
+      final today = await _repository.getToday();
+      emit(state.copyWith(loading: false, today: today));
+    } catch (_) {
+      emit(state.copyWith(loading: false));
+    }
   }
 
+  /// Puede lanzar si el repositorio falla; el llamador (la pantalla) debe
+  /// capturar el error y mostrar feedback al usuario.
   Future<void> addExpense({required double amount, required String concept, required String category}) async {
     await _repository.add(amount: amount, concept: concept, category: category);
     await load();

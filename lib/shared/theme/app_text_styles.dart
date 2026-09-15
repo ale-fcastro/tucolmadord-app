@@ -6,6 +6,17 @@ class AppTextStyles {
   // Roboto es la fuente por defecto de Android — no hace falta empaquetarla.
   static const String? fontFamily = null;
 
+  /// Monto/número protagonista de una pantalla (total a cobrar, venta del
+  /// día, saldo de un cliente). Antes cada pantalla usaba su propio tamaño
+  /// (28, 30 o 34) para este mismo rol.
+  static const TextStyle displayLarge = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 32,
+    fontWeight: FontWeight.w800,
+    height: 1.1,
+    letterSpacing: -0.5,
+  );
+
   static const TextStyle headlineSmall = TextStyle(
     fontFamily: fontFamily,
     fontSize: 22,
