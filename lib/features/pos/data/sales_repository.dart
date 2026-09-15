@@ -14,7 +14,11 @@ class SalesRepository {
   final ProductsRepository _productsRepository;
   final CustomersRepository _customersRepository;
 
-  SalesRepository(this._appDatabase, this._productsRepository, this._customersRepository);
+  SalesRepository(
+    this._appDatabase,
+    this._productsRepository,
+    this._customersRepository,
+  );
 
   /// Confirma una venta: inserta la venta y sus líneas, descuenta inventario,
   /// aplica el cargo a fiado si corresponde, y encola todo para sincronizar
@@ -61,7 +65,11 @@ class SalesRepository {
         );
         await txn.insert('sale_items', item.toMap());
         if (line.productId != null) {
-          await _productsRepository.adjustStock(txn, line.productId!, -line.quantity);
+          await _productsRepository.adjustStock(
+            txn,
+            line.productId!,
+            -line.quantity,
+          );
         }
       }
 
@@ -77,22 +85,29 @@ class SalesRepository {
 
     return sale.copyWithItems(
       cart
-          .map((l) => SaleItem(
-                id: _uuid.v4(),
-                saleId: saleId,
-                productId: l.productId,
-                productName: l.name,
-                quantity: l.quantity,
-                unitPrice: l.unitPrice,
-                lineTotal: l.lineTotal,
-              ))
+          .map(
+            (l) => SaleItem(
+              id: _uuid.v4(),
+              saleId: saleId,
+              productId: l.productId,
+              productName: l.name,
+              quantity: l.quantity,
+              unitPrice: l.unitPrice,
+              lineTotal: l.lineTotal,
+            ),
+          )
           .toList(),
     );
   }
 
   Future<List<Sale>> getToday() async {
     final db = await _appDatabase.database;
-    final startOfDay = DateTime.now().copyWith(hour: 0, minute: 0, second: 0, millisecond: 0);
+    final startOfDay = DateTime.now().copyWith(
+      hour: 0,
+      minute: 0,
+      second: 0,
+      millisecond: 0,
+    );
     final rows = await db.query(
       'sales',
       where: 'created_at >= ?',
@@ -110,20 +125,24 @@ class SalesRepository {
 
   Future<List<SaleItem>> getItems(String saleId) async {
     final db = await _appDatabase.database;
-    final rows = await db.query('sale_items', where: 'sale_id = ?', whereArgs: [saleId]);
+    final rows = await db.query(
+      'sale_items',
+      where: 'sale_id = ?',
+      whereArgs: [saleId],
+    );
     return rows.map(SaleItem.fromMap).toList();
   }
 }
 
 extension on Sale {
   Sale copyWithItems(List<SaleItem> items) => Sale(
-        id: id,
-        total: total,
-        paymentMethod: paymentMethod,
-        customerId: customerId,
-        receivedAmount: receivedAmount,
-        changeAmount: changeAmount,
-        createdAt: createdAt,
-        items: items,
-      );
+    id: id,
+    total: total,
+    paymentMethod: paymentMethod,
+    customerId: customerId,
+    receivedAmount: receivedAmount,
+    changeAmount: changeAmount,
+    createdAt: createdAt,
+    items: items,
+  );
 }

@@ -16,7 +16,8 @@ class AuthCubit extends Cubit<AuthState> {
   final AuthRepository _repository;
   final AuthSessionStore _session;
 
-  static const _connectionErrorMessage = 'No se pudo conectar con el servidor. Intenta de nuevo.';
+  static const _connectionErrorMessage =
+      'No se pudo conectar con el servidor. Intenta de nuevo.';
 
   /// Se llama una sola vez al arrancar la app. Si hay una sesión guardada y
   /// no está vencida, entra directo (Authenticated); si no, muestra login.
@@ -69,7 +70,10 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  Future<void> verifyEmail({required String email, required String code}) async {
+  Future<void> verifyEmail({
+    required String email,
+    required String code,
+  }) async {
     emit(NeedsVerification(email: email, isSubmitting: true));
     try {
       final session = await _repository.verifyEmail(email: email, code: code);
@@ -79,6 +83,89 @@ class AuthCubit extends Cubit<AuthState> {
       emit(NeedsVerification(email: email, error: e.message));
     } catch (_) {
       emit(NeedsVerification(email: email, error: _connectionErrorMessage));
+    }
+  }
+
+  /// Se llama con el ID token que devuelve el SDK de Google tras elegir una
+  /// cuenta. Si el correo ya tenía cuenta hace login directo; si es nuevo
+  /// pasa a NeedsGoogleBusinessInfo para pedir negocio + teléfono.
+  Future<void> loginWithGoogle({required String idToken}) async {
+    emit(const Authenticating());
+    try {
+      final result = await _repository.googleAuth(idToken: idToken);
+      final session = result.session;
+      if (session != null) {
+        await _session.save(session);
+        emit(Authenticated(session));
+        return;
+      }
+      final pending = result.pendingRegistration!;
+      emit(
+        NeedsGoogleBusinessInfo(
+          registrationToken: pending.registrationToken,
+          email: pending.email,
+          fullName: pending.fullName,
+        ),
+      );
+    } on ApiException catch (e) {
+      emit(Unauthenticated(error: e.message));
+    } catch (_) {
+      emit(const Unauthenticated(error: _connectionErrorMessage));
+    }
+  }
+
+  /// Completa el registro iniciado con Google: crea negocio + cuenta y deja
+  /// la sesión activa, igual que verifyEmail en el registro normal.
+  Future<void> completeGoogleRegistration({
+    required String registrationToken,
+    required String email,
+    required String fullName,
+    required String businessName,
+    required String phone,
+  }) async {
+    emit(
+      NeedsGoogleBusinessInfo(
+        registrationToken: registrationToken,
+        email: email,
+        fullName: fullName,
+        isSubmitting: true,
+      ),
+    );
+    try {
+      final session = await _repository.completeGoogleRegistration(
+        registrationToken: registrationToken,
+        businessName: businessName,
+        phone: phone,
+      );
+      await _session.save(session);
+      emit(Authenticated(session));
+    } on ValidationException catch (e) {
+      emit(
+        NeedsGoogleBusinessInfo(
+          registrationToken: registrationToken,
+          email: email,
+          fullName: fullName,
+          fieldErrors: e.errors,
+        ),
+      );
+    } on ApiException catch (e) {
+      emit(
+        NeedsGoogleBusinessInfo(
+          registrationToken: registrationToken,
+          email: email,
+          fullName: fullName,
+          error: e.message,
+        ),
+      );
+    } catch (_) {
+      emit(
+        NeedsGoogleBusinessInfo(
+          registrationToken: registrationToken,
+          email: email,
+          fullName: fullName,
+          error: _connectionErrorMessage,
+        ),
+      );
     }
   }
 

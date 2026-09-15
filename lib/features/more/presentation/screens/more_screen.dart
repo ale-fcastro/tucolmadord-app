@@ -18,24 +18,62 @@ class MoreScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = <_MoreItem>[
-      _MoreItem('Ventas', Icons.receipt_long_outlined, () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const VentasHistorialScreen()))),
-      _MoreItem('Gastos', Icons.receipt_long_outlined, () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const GastosHistorialScreen()))),
-      _MoreItem('Reportes', Icons.insert_chart_outlined, () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProximamenteScreen(title: 'Reportes'))), comingSoon: true),
+      _MoreItem(
+        'Ventas',
+        Icons.receipt_long_outlined,
+        () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const VentasHistorialScreen()),
+        ),
+      ),
+      _MoreItem(
+        'Gastos',
+        Icons.receipt_long_outlined,
+        () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const GastosHistorialScreen()),
+        ),
+      ),
+      _MoreItem(
+        'Reportes',
+        Icons.insert_chart_outlined,
+        () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const ProximamenteScreen(title: 'Reportes'),
+          ),
+        ),
+        comingSoon: true,
+      ),
       _MoreItem(
         'Datos del negocio',
         Icons.storefront_outlined,
-        () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => BlocProvider(create: (_) => sl<BusinessCubit>(), child: const BusinessSettingsScreen()),
-            )),
+        () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => BlocProvider(
+              create: (_) => sl<BusinessCubit>(),
+              child: const BusinessSettingsScreen(),
+            ),
+          ),
+        ),
       ),
-      _MoreItem('Ayuda', Icons.help_outline, () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProximamenteScreen(title: 'Ayuda'))), comingSoon: true),
+      _MoreItem(
+        'Ayuda',
+        Icons.help_outline,
+        () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const ProximamenteScreen(title: 'Ayuda'),
+          ),
+        ),
+        comingSoon: true,
+      ),
     ];
 
     return Column(
       children: [
         const Padding(
           padding: EdgeInsets.fromLTRB(16, 14, 16, 8),
-          child: Align(alignment: Alignment.centerLeft, child: AppHeadline('Más')),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: AppHeadline('Más'),
+          ),
         ),
         Expanded(
           child: ListView(
@@ -49,19 +87,39 @@ class MoreScreen extends StatelessWidget {
                     return InkWell(
                       onTap: item.onTap,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 10),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 13,
+                          horizontal: 10,
+                        ),
                         decoration: AppDecorations.rowDivider(context),
                         child: Row(
                           children: [
                             Container(
                               width: 34,
                               height: 34,
-                              decoration: BoxDecoration(color: AppColors.backgroundLight, borderRadius: BorderRadius.circular(AppDecorations.radius)),
+                              decoration: BoxDecoration(
+                                color: AppColors.backgroundLight,
+                                borderRadius: BorderRadius.circular(
+                                  AppDecorations.radius,
+                                ),
+                              ),
                               alignment: Alignment.center,
-                              child: Icon(item.icon, size: 18, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: item.comingSoon ? 0.4 : 0.7)),
+                              child: Icon(
+                                item.icon,
+                                size: 18,
+                                color: Theme.of(context).colorScheme.onSurface
+                                    .withValues(
+                                      alpha: item.comingSoon ? 0.4 : 0.7,
+                                    ),
+                              ),
                             ),
                             const SizedBox(width: 12),
-                            Expanded(child: AppSubtitle(item.label, color: item.comingSoon ? outline : null)),
+                            Expanded(
+                              child: AppSubtitle(
+                                item.label,
+                                color: item.comingSoon ? outline : null,
+                              ),
+                            ),
                             if (item.comingSoon) ...[
                               AppLabel('Próximamente', color: outline),
                               const SizedBox(width: 8),

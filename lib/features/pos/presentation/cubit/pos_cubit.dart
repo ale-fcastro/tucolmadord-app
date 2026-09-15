@@ -16,28 +16,41 @@ class PosCubit extends Cubit<PosState> {
   final CustomersRepository _customersRepository;
   final SalesRepository _salesRepository;
 
-  PosCubit(this._productsRepository, this._customersRepository, this._salesRepository)
-      : super(const PosState()) {
+  PosCubit(
+    this._productsRepository,
+    this._customersRepository,
+    this._salesRepository,
+  ) : super(const PosState()) {
     _load();
   }
 
   Future<void> _load() async {
     final products = await _productsRepository.getAll();
     final customers = await _customersRepository.getAll();
-    emit(state.copyWith(loading: false, products: products, customers: customers));
+    emit(
+      state.copyWith(loading: false, products: products, customers: customers),
+    );
   }
 
   void setSearch(String value) => emit(state.copyWith(search: value));
-  void setCategory(String value) => emit(state.copyWith(category: value, search: ''));
+  void setCategory(String value) =>
+      emit(state.copyWith(category: value, search: ''));
 
   void addUnitToCart(Product product) {
-    final existing = state.cart.where((l) => l.productId == product.id && l.isUnit).firstOrNull;
+    final existing = state.cart
+        .where((l) => l.productId == product.id && l.isUnit)
+        .firstOrNull;
     if (existing != null) {
       final newQty = existing.quantity + 1;
       final updated = state.cart
-          .map((l) => l.id == existing.id
-              ? l.copyWith(quantity: newQty, lineTotal: newQty * (product.price ?? 0))
-              : l)
+          .map(
+            (l) => l.id == existing.id
+                ? l.copyWith(
+                    quantity: newQty,
+                    lineTotal: newQty * (product.price ?? 0),
+                  )
+                : l,
+          )
           .toList();
       emit(state.copyWith(cart: updated));
       return;
@@ -85,7 +98,10 @@ class PosCubit extends Cubit<PosState> {
     final updated = state.cart.map((l) {
       if (l.id != lineId) return l;
       final newQty = l.quantity + 1;
-      return l.copyWith(quantity: newQty, lineTotal: newQty * (l.unitPrice ?? 0));
+      return l.copyWith(
+        quantity: newQty,
+        lineTotal: newQty * (l.unitPrice ?? 0),
+      );
     }).toList();
     emit(state.copyWith(cart: updated));
   }
@@ -98,37 +114,72 @@ class PosCubit extends Cubit<PosState> {
     }
     final newQty = line.quantity - 1;
     final updated = state.cart
-        .map((l) => l.id == lineId ? l.copyWith(quantity: newQty, lineTotal: newQty * (l.unitPrice ?? 0)) : l)
+        .map(
+          (l) => l.id == lineId
+              ? l.copyWith(
+                  quantity: newQty,
+                  lineTotal: newQty * (l.unitPrice ?? 0),
+                )
+              : l,
+        )
         .toList();
     emit(state.copyWith(cart: updated));
   }
 
   void removeLine(String lineId) {
-    emit(state.copyWith(cart: state.cart.where((l) => l.id != lineId).toList()));
+    emit(
+      state.copyWith(cart: state.cart.where((l) => l.id != lineId).toList()),
+    );
   }
 
-  void selectPaymentMethod(PaymentMethod method) =>
-      emit(state.copyWith(paymentMethod: method, receivedAmount: 0, clearSelectedCustomerId: true));
+  void selectPaymentMethod(PaymentMethod method) => emit(
+    state.copyWith(
+      paymentMethod: method,
+      receivedAmount: 0,
+      clearSelectedCustomerId: true,
+    ),
+  );
 
-  void setReceivedAmount(double amount) => emit(state.copyWith(receivedAmount: amount));
+  void setReceivedAmount(double amount) =>
+      emit(state.copyWith(receivedAmount: amount));
 
-  void selectCustomer(String customerId) => emit(state.copyWith(selectedCustomerId: customerId));
+  void selectCustomer(String customerId) =>
+      emit(state.copyWith(selectedCustomerId: customerId));
 
   Future<void> confirmSale() async {
     final sale = await _salesRepository.checkout(
       cart: state.cart,
       paymentMethod: state.paymentMethod,
-      customerId: state.paymentMethod == PaymentMethod.fiado ? state.selectedCustomerId : null,
-      receivedAmount: state.paymentMethod == PaymentMethod.efectivo ? state.receivedAmount : null,
-      changeAmount: state.paymentMethod == PaymentMethod.efectivo ? state.changeAmount : null,
+      customerId: state.paymentMethod == PaymentMethod.fiado
+          ? state.selectedCustomerId
+          : null,
+      receivedAmount: state.paymentMethod == PaymentMethod.efectivo
+          ? state.receivedAmount
+          : null,
+      changeAmount: state.paymentMethod == PaymentMethod.efectivo
+          ? state.changeAmount
+          : null,
     );
     final products = await _productsRepository.getAll();
     final customers = await _customersRepository.getAll();
-    emit(PosState(loading: false, products: products, customers: customers, lastSale: sale));
+    emit(
+      PosState(
+        loading: false,
+        products: products,
+        customers: customers,
+        lastSale: sale,
+      ),
+    );
   }
 
   void startNewSale() {
-    emit(state.copyWith(cart: const [], receivedAmount: 0, clearSelectedCustomerId: true));
+    emit(
+      state.copyWith(
+        cart: const [],
+        receivedAmount: 0,
+        clearSelectedCustomerId: true,
+      ),
+    );
   }
 }
 

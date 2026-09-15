@@ -9,33 +9,31 @@ import '../../../../shared/widgets/text/app_text.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
 
-final _emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+/// Último paso del registro con Google — se llega acá cuando el correo de
+/// Google autenticó bien pero no tenía cuenta todavía. Falta el nombre del
+/// negocio y el teléfono para crearla; el gate en main.dart muestra esta
+/// pantalla mientras el estado sea `NeedsGoogleBusinessInfo`.
+class CompleteGoogleRegistrationScreen extends StatefulWidget {
+  const CompleteGoogleRegistrationScreen({super.key, required this.state});
 
-/// Pantalla de registro — crea el negocio + el usuario dueño. Al terminar
-/// con éxito el AuthCubit pasa a NeedsVerification y el gate en main.dart
-/// navega automáticamente a VerifyEmailScreen; esta pantalla no navega en
-/// el camino feliz, solo hacia atrás (a LoginScreen) si el usuario cancela.
-class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+  final NeedsGoogleBusinessInfo state;
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  State<CompleteGoogleRegistrationScreen> createState() =>
+      _CompleteGoogleRegistrationScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _CompleteGoogleRegistrationScreenState
+    extends State<CompleteGoogleRegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
   final _businessNameCtrl = TextEditingController();
-  final _ownerFullNameCtrl = TextEditingController();
-  final _emailCtrl = TextEditingController();
-  final _passwordCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
   Map<String, List<String>> _fieldErrors = const {};
 
   @override
   void dispose() {
     _businessNameCtrl.dispose();
-    _ownerFullNameCtrl.dispose();
-    _emailCtrl.dispose();
-    _passwordCtrl.dispose();
+    _phoneCtrl.dispose();
     super.dispose();
   }
 
@@ -53,31 +51,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return _serverError('businessName');
   }
 
-  String? _ownerFullNameValidator(String? v) {
-    if (v == null || v.trim().isEmpty) return 'Ingresa tu nombre completo';
-    return _serverError('ownerFullName');
-  }
-
-  String? _emailValidator(String? v) {
-    if (v == null || v.trim().isEmpty) return 'Ingresa tu correo';
-    if (!_emailRegex.hasMatch(v.trim())) return 'Correo inválido';
-    return _serverError('email');
-  }
-
-  String? _passwordValidator(String? v) {
-    if (v == null || v.isEmpty) return 'Ingresa una contraseña';
-    if (v.length < 6) return 'Debe tener al menos 6 caracteres';
-    return _serverError('password');
+  String? _phoneValidator(String? v) {
+    if (v == null || v.trim().isEmpty) return 'Ingresa un teléfono';
+    return _serverError('phone');
   }
 
   void _submit(AuthCubit cubit) {
     setState(() => _fieldErrors = const {});
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    cubit.register(
+    cubit.completeGoogleRegistration(
+      registrationToken: widget.state.registrationToken,
+      email: widget.state.email,
+      fullName: widget.state.fullName,
       businessName: _businessNameCtrl.text.trim(),
-      ownerFullName: _ownerFullNameCtrl.text.trim(),
-      email: _emailCtrl.text.trim(),
-      password: _passwordCtrl.text,
+      phone: _phoneCtrl.text.trim(),
     );
   }
 
@@ -86,7 +73,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final cubit = context.read<AuthCubit>();
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
-        if (state is! Unauthenticated) return;
+        if (state is! NeedsGoogleBusinessInfo) return;
         if (state.fieldErrors != null && state.fieldErrors!.isNotEmpty) {
           setState(() => _fieldErrors = state.fieldErrors!);
           _formKey.currentState?.validate();
@@ -96,15 +83,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
       },
       child: BlocBuilder<AuthCubit, AuthState>(
         builder: (context, state) {
-          final loading = state is Authenticating;
+          final loading =
+              state is NeedsGoogleBusinessInfo && state.isSubmitting;
           return AppAuthScreen(
-            appBar: AppBar(title: const Text('Crear cuenta')),
+            appBar: AppBar(title: const Text('Un último paso')),
             formKey: _formKey,
             children: [
               const AppTitle('Registra tu colmado'),
               const SizedBox(height: 6),
-              const AppDescription(
-                'Crea tu cuenta para empezar a usar TuColmadoRD.',
+              AppDescription(
+                'Ya confirmamos ${widget.state.email} con Google. '
+                'Solo falta el nombre de tu negocio y tu teléfono.',
               ),
               const SizedBox(height: 24),
               AppTextField(
@@ -115,26 +104,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 14),
               AppTextField(
-                label: 'Nombre completo del dueño',
-                controller: _ownerFullNameCtrl,
+                label: 'Teléfono',
+                controller: _phoneCtrl,
                 enabled: !loading,
-                validator: _ownerFullNameValidator,
-              ),
-              const SizedBox(height: 14),
-              AppTextField(
-                label: 'Correo electrónico',
-                controller: _emailCtrl,
-                enabled: !loading,
-                keyboardType: TextInputType.emailAddress,
-                validator: _emailValidator,
-              ),
-              const SizedBox(height: 14),
-              AppTextField(
-                label: 'Contraseña',
-                controller: _passwordCtrl,
-                enabled: !loading,
-                obscureText: true,
-                validator: _passwordValidator,
+                keyboardType: TextInputType.phone,
+                validator: _phoneValidator,
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -144,15 +118,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   isLoading: loading,
                   enabled: !loading,
                   onPressed: () => _submit(cubit),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: TextButton(
-                  onPressed: loading
-                      ? null
-                      : () => Navigator.of(context).maybePop(),
-                  child: const Text('¿Ya tienes cuenta? Inicia sesión'),
                 ),
               ),
             ],

@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 
 import '../auth/data/auth_repository.dart';
 import '../auth/data/auth_session.dart';
+import '../auth/data/google_auth_service.dart';
 import '../auth/presentation/cubit/auth_cubit.dart';
 import '../../features/business/data/business_profile_store.dart';
 import '../../features/business/data/business_repository.dart';
@@ -50,6 +51,7 @@ Future<void> configureDependencies() async {
 void _registerAuthFeature() {
   sl.registerLazySingleton(() => AuthRepository());
   sl.registerLazySingleton(() => AuthSessionStore());
+  sl.registerLazySingleton(() => GoogleAuthService());
   sl.registerFactory(() => AuthCubit(sl(), sl()));
 }
 

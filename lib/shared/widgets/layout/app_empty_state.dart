@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../text/app_text.dart';
 
 /// Estado vacío consistente — "no hay datos todavía" con ícono, mensaje y
@@ -28,7 +29,11 @@ class AppEmptyState extends StatelessWidget {
           children: [
             Icon(icon, size: 48, color: outline),
             const SizedBox(height: 12),
-            AppDescription(message, color: outline, textAlign: TextAlign.center),
+            AppDescription(
+              message,
+              color: outline,
+              textAlign: TextAlign.center,
+            ),
             if (actionLabel != null && onAction != null) ...[
               const SizedBox(height: 16),
               TextButton(onPressed: onAction, child: Text(actionLabel!)),

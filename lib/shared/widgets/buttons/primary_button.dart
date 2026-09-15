@@ -24,26 +24,40 @@ class PrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      style: color != null ? ElevatedButton.styleFrom(backgroundColor: color) : null,
+      style: color != null
+          ? ElevatedButton.styleFrom(backgroundColor: color)
+          : null,
       onPressed: (enabled && !isLoading) ? onPressed : null,
       child: isLoading
           ? const SizedBox(
               width: 20,
               height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
             )
           : icon != null
-              ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [Icon(icon, size: 18), const SizedBox(width: 8), Text(label)],
-                )
-              : Text(label),
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 18),
+                const SizedBox(width: 8),
+                Text(label),
+              ],
+            )
+          : Text(label),
     );
   }
 }
 
 class SecondaryButton extends StatelessWidget {
-  const SecondaryButton({super.key, required this.label, required this.onPressed, this.icon});
+  const SecondaryButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.icon,
+  });
 
   final String label;
   final VoidCallback? onPressed;
@@ -56,7 +70,11 @@ class SecondaryButton extends StatelessWidget {
       child: icon != null
           ? Row(
               mainAxisSize: MainAxisSize.min,
-              children: [Icon(icon, size: 18), const SizedBox(width: 8), Text(label)],
+              children: [
+                Icon(icon, size: 18),
+                const SizedBox(width: 8),
+                Text(label),
+              ],
             )
           : Text(label),
     );

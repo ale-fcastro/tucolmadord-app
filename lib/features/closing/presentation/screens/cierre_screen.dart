@@ -27,7 +27,10 @@ class CierreScreen extends StatelessWidget {
 class _CierreView extends StatelessWidget {
   const _CierreView();
 
-  Future<void> _confirmAndClose(BuildContext context, ClosingCubit cubit) async {
+  Future<void> _confirmAndClose(
+    BuildContext context,
+    ClosingCubit cubit,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -56,7 +59,8 @@ class _CierreView extends StatelessWidget {
       title: 'Cierre del día',
       actions: [
         BlocBuilder<ClosingCubit, ClosingState>(
-          buildWhen: (previous, current) => previous.isSendingEmail != current.isSendingEmail,
+          buildWhen: (previous, current) =>
+              previous.isSendingEmail != current.isSendingEmail,
           builder: (context, state) {
             if (state.isSendingEmail) {
               return const Padding(
@@ -78,8 +82,10 @@ class _CierreView extends StatelessWidget {
       ],
       body: BlocConsumer<ClosingCubit, ClosingState>(
         listenWhen: (previous, current) =>
-            (current.errorMessage != null && current.errorMessage != previous.errorMessage) ||
-            (current.successMessage != null && current.successMessage != previous.successMessage),
+            (current.errorMessage != null &&
+                current.errorMessage != previous.errorMessage) ||
+            (current.successMessage != null &&
+                current.successMessage != previous.successMessage),
         listener: (context, state) {
           if (state.errorMessage != null) {
             AppNotification.error(context, state.errorMessage!);
@@ -95,7 +101,9 @@ class _CierreView extends StatelessWidget {
 
           final cubit = context.read<ClosingCubit>();
           final summary = state.summary;
-          final profitColor = summary.estimatedProfit >= 0 ? AppColors.success : AppColors.error;
+          final profitColor = summary.estimatedProfit >= 0
+              ? AppColors.success
+              : AppColors.error;
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
@@ -107,7 +115,11 @@ class _CierreView extends StatelessWidget {
                 child: Column(
                   children: [
                     _Row('Ventas', Money.label(summary.totalSales)),
-                    _Row('Cantidad de ventas', '${summary.salesCount}', last: true),
+                    _Row(
+                      'Cantidad de ventas',
+                      '${summary.salesCount}',
+                      last: true,
+                    ),
                   ],
                 ),
               ),
@@ -132,7 +144,11 @@ class _CierreView extends StatelessWidget {
                 child: Column(
                   children: [
                     _Row('Gastos', Money.label(summary.expensesTotal)),
-                    _HeroRow('Ganancia estimada', Money.label(summary.estimatedProfit), color: profitColor),
+                    _HeroRow(
+                      'Ganancia estimada',
+                      Money.label(summary.estimatedProfit),
+                      color: profitColor,
+                    ),
                   ],
                 ),
               ),
@@ -143,9 +159,16 @@ class _CierreView extends StatelessWidget {
                   padding: const EdgeInsets.all(18),
                   child: Column(
                     children: [
-                      const Icon(Icons.check_circle_outline, size: 34, color: AppColors.success),
+                      const Icon(
+                        Icons.check_circle_outline,
+                        size: 34,
+                        color: AppColors.success,
+                      ),
                       const SizedBox(height: 8),
-                      const AppSubtitle('Día cerrado', color: AppColors.success),
+                      const AppSubtitle(
+                        'Día cerrado',
+                        color: AppColors.success,
+                      ),
                       const SizedBox(height: 2),
                       const AppLabel('Esto fue lo que pasó hoy.'),
                       const SizedBox(height: 14),
@@ -190,10 +213,7 @@ class _Row extends StatelessWidget {
       decoration: last ? null : AppDecorations.rowDivider(context),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          AppLabel(label),
-          AppSubtitle(value),
-        ],
+        children: [AppLabel(label), AppSubtitle(value)],
       ),
     );
   }

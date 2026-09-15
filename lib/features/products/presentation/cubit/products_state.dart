@@ -15,7 +15,11 @@ class ProductsLoaded extends ProductsState {
   final String search;
   final ProductsFilter filter;
 
-  const ProductsLoaded({required this.all, this.search = '', this.filter = ProductsFilter.all});
+  const ProductsLoaded({
+    required this.all,
+    this.search = '',
+    this.filter = ProductsFilter.all,
+  });
 
   /// Productos que coinciden con el texto de búsqueda (sin aplicar el chip de filtro).
   List<Product> get _searched {
@@ -44,11 +48,16 @@ class ProductsLoaded extends ProductsState {
   // Conteos por categoría (respetan la búsqueda activa, no el chip seleccionado)
   // usados para mostrar "Bajo stock (3)" etc. en los chips de filtro.
   int get allCount => _searched.length;
-  int get lowStockCount => _searched.where((p) => p.isLowStock && !p.isOutOfStock).length;
+  int get lowStockCount =>
+      _searched.where((p) => p.isLowStock && !p.isOutOfStock).length;
   int get outOfStockCount => _searched.where((p) => p.isOutOfStock).length;
   int get untrackedCount => _searched.where((p) => !p.trackStock).length;
 
-  ProductsLoaded copyWith({List<Product>? all, String? search, ProductsFilter? filter}) {
+  ProductsLoaded copyWith({
+    List<Product>? all,
+    String? search,
+    ProductsFilter? filter,
+  }) {
     return ProductsLoaded(
       all: all ?? this.all,
       search: search ?? this.search,

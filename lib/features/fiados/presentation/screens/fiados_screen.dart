@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/utils/money.dart';
 import '../../../../shared/theme/app_colors.dart';
+import '../../../../shared/widgets/buttons/primary_button.dart';
 import '../../../../shared/widgets/inputs/app_search_field.dart';
 import '../../../../shared/widgets/layout/app_card.dart';
 import '../../../../shared/widgets/layout/app_empty_state.dart';
@@ -25,10 +26,10 @@ class FiadosScreen extends StatelessWidget {
               child: Row(
                 children: [
                   const Expanded(child: AppHeadline('Fiados')),
-                  ElevatedButton(
+                  PrimaryButton(
+                    label: 'Nuevo cliente',
+                    icon: Icons.add,
                     onPressed: () => _showAddCustomerDialog(context, cubit),
-                    style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9)),
-                    child: const Text('Nuevo cliente', style: TextStyle(fontSize: 12.5)),
                   ),
                 ],
               ),
@@ -37,14 +38,20 @@ class FiadosScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
               child: AppCard(
                 color: AppColors.errorBg,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 child: SizedBox(
                   width: double.infinity,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const AppLabel('Total pendiente', color: AppColors.error),
-                      AppAmount(Money.label(state.totalPending), color: AppColors.error),
+                      AppAmount(
+                        Money.label(state.totalPending),
+                        color: AppColors.error,
+                      ),
                     ],
                   ),
                 ),
@@ -52,56 +59,75 @@ class FiadosScreen extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              child: AppSearchField(hintText: 'Buscar cliente...', onChanged: cubit.setSearch),
+              child: AppSearchField(
+                hintText: 'Buscar cliente...',
+                onChanged: cubit.setSearch,
+              ),
             ),
             Expanded(
               child: state.loading
                   ? const Center(child: CircularProgressIndicator())
                   : state.visible.isEmpty
-                      ? AppEmptyState(
-                          icon: Icons.handshake_outlined,
-                          message: state.search.isEmpty
-                              ? 'Aún no tienes clientes con fiado — el fiado es el crédito informal '
-                                  'que le das a tus clientes de confianza.'
-                              : 'No hay clientes que coincidan con la búsqueda.',
-                          actionLabel: 'Agregar cliente',
-                          onAction: () => _showAddCustomerDialog(context, cubit),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
-                          itemCount: state.visible.length,
-                          itemBuilder: (context, i) {
-                            final c = state.visible[i];
-                            final isPaidOff = c.balance <= 0;
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
-                              child: Opacity(
-                                opacity: isPaidOff ? 0.55 : 1,
-                                child: AppCard(
-                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-                                  onTap: () => Navigator.of(context).push(
-                                    MaterialPageRoute(builder: (_) => FiadoDetailScreen(customerId: c.id, parentCubit: cubit)),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      CircleAvatar(
-                                        radius: 19,
-                                        backgroundColor: AppColors.fiadoBg,
-                                        child: Text(c.initial, style: const TextStyle(color: AppColors.fiado, fontWeight: FontWeight.w700)),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(child: AppSubtitle(c.name)),
-                                      AppSubtitle(
-                                        Money.label(c.balance),
-                                        color: c.balance > 0 ? AppColors.error : AppColors.success,
-                                      ),
-                                    ],
+                  ? AppEmptyState(
+                      icon: Icons.handshake_outlined,
+                      message: state.search.isEmpty
+                          ? 'Aún no tienes clientes con fiado — el fiado es el crédito informal '
+                                'que le das a tus clientes de confianza.'
+                          : 'No hay clientes que coincidan con la búsqueda.',
+                      actionLabel: 'Agregar cliente',
+                      onAction: () => _showAddCustomerDialog(context, cubit),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
+                      itemCount: state.visible.length,
+                      itemBuilder: (context, i) {
+                        final c = state.visible[i];
+                        final isPaidOff = c.balance <= 0;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Opacity(
+                            opacity: isPaidOff ? 0.55 : 1,
+                            child: AppCard(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 13,
+                              ),
+                              onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => FiadoDetailScreen(
+                                    customerId: c.id,
+                                    parentCubit: cubit,
                                   ),
                                 ),
                               ),
-                            );
-                          },
-                        ),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 19,
+                                    backgroundColor: AppColors.fiadoBg,
+                                    child: Text(
+                                      c.initial,
+                                      style: const TextStyle(
+                                        color: AppColors.fiado,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(child: AppSubtitle(c.name)),
+                                  AppSubtitle(
+                                    Money.label(c.balance),
+                                    color: c.balance > 0
+                                        ? AppColors.error
+                                        : AppColors.success,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
             ),
           ],
         );
@@ -119,13 +145,21 @@ class FiadosScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(controller: controller, decoration: const InputDecoration(hintText: 'Nombre')),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(hintText: 'Nombre'),
+            ),
             const SizedBox(height: 8),
-            const AppDescription('Esto solo guarda el contacto. Para dar fiado, entra al cliente y registra el cargo.'),
+            const AppDescription(
+              'Esto solo guarda el contacto. Para dar fiado, entra al cliente y registra el cargo.',
+            ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancelar'),
+          ),
           TextButton(
             onPressed: () {
               if (controller.text.trim().isNotEmpty) {

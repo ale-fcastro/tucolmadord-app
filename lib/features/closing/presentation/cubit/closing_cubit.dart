@@ -24,7 +24,10 @@ class ClosingState {
     this.successMessage,
   });
 
-  static const initial = ClosingState(summary: DaySummary.empty, isLoading: true);
+  static const initial = ClosingState(
+    summary: DaySummary.empty,
+    isLoading: true,
+  );
 
   ClosingState copyWith({
     DaySummary? summary,
@@ -59,10 +62,12 @@ class ClosingCubit extends Cubit<ClosingState> {
       final summary = await _repository.getTodaySummary();
       emit(state.copyWith(summary: summary, isLoading: false));
     } catch (_) {
-      emit(state.copyWith(
-        isLoading: false,
-        errorMessage: 'No se pudo cargar el resumen del día.',
-      ));
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: 'No se pudo cargar el resumen del día.',
+        ),
+      );
     }
   }
 
@@ -73,10 +78,12 @@ class ClosingCubit extends Cubit<ClosingState> {
       final summary = await _repository.getTodaySummary();
       emit(state.copyWith(summary: summary, isClosing: false));
     } catch (_) {
-      emit(state.copyWith(
-        isClosing: false,
-        errorMessage: 'No se pudo cerrar el día. Intenta de nuevo.',
-      ));
+      emit(
+        state.copyWith(
+          isClosing: false,
+          errorMessage: 'No se pudo cerrar el día. Intenta de nuevo.',
+        ),
+      );
     }
   }
 
@@ -84,15 +91,19 @@ class ClosingCubit extends Cubit<ClosingState> {
     emit(state.copyWith(isSendingEmail: true));
     try {
       await _repository.sendReportEmail();
-      emit(state.copyWith(
-        isSendingEmail: false,
-        successMessage: 'Reporte enviado a tu correo.',
-      ));
+      emit(
+        state.copyWith(
+          isSendingEmail: false,
+          successMessage: 'Reporte enviado a tu correo.',
+        ),
+      );
     } catch (_) {
-      emit(state.copyWith(
-        isSendingEmail: false,
-        errorMessage: 'No se pudo enviar el reporte. Intenta de nuevo.',
-      ));
+      emit(
+        state.copyWith(
+          isSendingEmail: false,
+          errorMessage: 'No se pudo enviar el reporte. Intenta de nuevo.',
+        ),
+      );
     }
   }
 }

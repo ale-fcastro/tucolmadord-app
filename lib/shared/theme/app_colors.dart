@@ -32,7 +32,11 @@ class AppColors {
   // Light
   static const Color backgroundLight = Color(0xFFF6F1E8);
   static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color surfaceVariantLight = Color(0xFFF6F1E8);
+  // Antes igual a `backgroundLight` — un input "filled" con ese color se
+  // volvía invisible sobre el fondo de la pantalla. Reusa el blanco de
+  // `surfaceLight` (mismo tono que cards/search) para que cualquier campo
+  // interactivo se distinga del fondo sin inventar un color nuevo.
+  static const Color surfaceVariantLight = Color(0xFFFFFFFF);
   static const Color onBackgroundLight = Color(0xFF201F1D);
   static const Color onSurfaceLight = Color(0xFF201F1D);
   static const Color outlineLight = Color(0xFFDAD4C7);

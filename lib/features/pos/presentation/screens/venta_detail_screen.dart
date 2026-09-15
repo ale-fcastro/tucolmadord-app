@@ -52,18 +52,26 @@ class _VentaDetailScreenState extends State<VentaDetailScreen> {
   Future<void> _share(List<SaleItem> items) async {
     try {
       final bytes = await _buildPdf(items);
-      await Printing.sharePdf(bytes: bytes, filename: 'factura_${widget.sale.id.substring(0, 6)}.pdf');
+      await Printing.sharePdf(
+        bytes: bytes,
+        filename: 'factura_${widget.sale.id.substring(0, 6)}.pdf',
+      );
     } catch (_) {
-      if (mounted) AppNotification.error(context, 'No se pudo compartir la factura.');
+      if (mounted)
+        AppNotification.error(context, 'No se pudo compartir la factura.');
     }
   }
 
   Future<void> _print(List<SaleItem> items) async {
     try {
       final bytes = await _buildPdf(items);
-      await Printing.layoutPdf(onLayout: (_) async => bytes, name: 'factura_${widget.sale.id.substring(0, 6)}.pdf');
+      await Printing.layoutPdf(
+        onLayout: (_) async => bytes,
+        name: 'factura_${widget.sale.id.substring(0, 6)}.pdf',
+      );
     } catch (_) {
-      if (mounted) AppNotification.error(context, 'No se pudo imprimir la factura.');
+      if (mounted)
+        AppNotification.error(context, 'No se pudo imprimir la factura.');
     }
   }
 
@@ -88,13 +96,17 @@ class _VentaDetailScreenState extends State<VentaDetailScreen> {
               onAction: _reloadItems,
             );
           }
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          if (!snapshot.hasData)
+            return const Center(child: CircularProgressIndicator());
           final items = snapshot.data!;
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
             children: [
               AppCard(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Column(
                   children: [
                     Row(
@@ -121,7 +133,9 @@ class _VentaDetailScreenState extends State<VentaDetailScreen> {
                           FutureBuilder<Customer?>(
                             future: _customerFuture,
                             builder: (context, customerSnapshot) {
-                              return AppSubtitle(customerSnapshot.data?.name ?? '—');
+                              return AppSubtitle(
+                                customerSnapshot.data?.name ?? '—',
+                              );
                             },
                           ),
                         ],
@@ -158,36 +172,43 @@ class _VentaDetailScreenState extends State<VentaDetailScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   children: items
-                      .map((l) => Container(
-                            padding: const EdgeInsets.symmetric(vertical: 9),
-                            decoration: AppDecorations.rowDivider(context),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      AppDescription(l.productName),
-                                      if (l.unitPrice != null) ...[
-                                        const SizedBox(height: 2),
-                                        AppLabel('${_quantityLabel(l.quantity)} x ${Money.label(l.unitPrice!)}'),
-                                      ],
+                      .map(
+                        (l) => Container(
+                          padding: const EdgeInsets.symmetric(vertical: 9),
+                          decoration: AppDecorations.rowDivider(context),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    AppDescription(l.productName),
+                                    if (l.unitPrice != null) ...[
+                                      const SizedBox(height: 2),
+                                      AppLabel(
+                                        '${_quantityLabel(l.quantity)} x ${Money.label(l.unitPrice!)}',
+                                      ),
                                     ],
-                                  ),
+                                  ],
                                 ),
-                                AppSubtitle(Money.label(l.lineTotal)),
-                              ],
-                            ),
-                          ))
+                              ),
+                              AppSubtitle(Money.label(l.lineTotal)),
+                            ],
+                          ),
+                        ),
+                      )
                       .toList(),
                 ),
               ),
               const SizedBox(height: 16),
               AppCard(
                 color: AppColors.infoBg,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -200,11 +221,19 @@ class _VentaDetailScreenState extends State<VentaDetailScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: SecondaryButton(icon: Icons.share_outlined, label: 'Compartir', onPressed: () => _share(items)),
+                    child: SecondaryButton(
+                      icon: Icons.share_outlined,
+                      label: 'Compartir',
+                      onPressed: () => _share(items),
+                    ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: SecondaryButton(icon: Icons.print_outlined, label: 'Imprimir', onPressed: () => _print(items)),
+                    child: SecondaryButton(
+                      icon: Icons.print_outlined,
+                      label: 'Imprimir',
+                      onPressed: () => _print(items),
+                    ),
                   ),
                 ],
               ),

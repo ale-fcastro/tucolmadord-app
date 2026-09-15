@@ -48,7 +48,8 @@ class _VentasHistorialScreenState extends State<VentasHistorialScreen> {
               onAction: _reload,
             );
           }
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          if (!snapshot.hasData)
+            return const Center(child: CircularProgressIndicator());
           final sales = snapshot.data!;
           if (sales.isEmpty) {
             return const AppEmptyState(
@@ -66,9 +67,15 @@ class _VentasHistorialScreenState extends State<VentasHistorialScreen> {
                 decoration: AppDecorations.rowDivider(context),
                 child: ListTile(
                   contentPadding: EdgeInsets.zero,
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => VentaDetailScreen(sale: s))),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => VentaDetailScreen(sale: s),
+                    ),
+                  ),
                   title: AppSubtitle('Venta #${s.id.substring(0, 6)}'),
-                  subtitle: AppLabel('${dateTimeLabel(s.createdAt)} · ${paymentMethodLabel(s.paymentMethod)}'),
+                  subtitle: AppLabel(
+                    '${dateTimeLabel(s.createdAt)} · ${paymentMethodLabel(s.paymentMethod)}',
+                  ),
                   trailing: AppSubtitle(Money.label(s.total)),
                 ),
               );

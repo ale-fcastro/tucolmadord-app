@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../theme/app_text_styles.dart';
 
 /// Headline grande — títulos de pantalla principal.
@@ -11,7 +12,11 @@ class AppHeadline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = Theme.of(context).textTheme.headlineSmall;
-    return Text(text, textAlign: textAlign, style: color != null ? style?.copyWith(color: color) : style);
+    return Text(
+      text,
+      textAlign: textAlign,
+      style: color != null ? style?.copyWith(color: color) : style,
+    );
   }
 }
 
@@ -25,7 +30,11 @@ class AppTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = Theme.of(context).textTheme.titleMedium;
-    return Text(text, textAlign: textAlign, style: color != null ? style?.copyWith(color: color) : style);
+    return Text(
+      text,
+      textAlign: textAlign,
+      style: color != null ? style?.copyWith(color: color) : style,
+    );
   }
 }
 
@@ -40,7 +49,11 @@ class AppSubtitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final base = Theme.of(context).textTheme.titleSmall;
     final style = base?.copyWith(fontWeight: FontWeight.w500);
-    return Text(text, textAlign: textAlign, style: color != null ? style?.copyWith(color: color) : style);
+    return Text(
+      text,
+      textAlign: textAlign,
+      style: color != null ? style?.copyWith(color: color) : style,
+    );
   }
 }
 
@@ -82,7 +95,10 @@ class AppLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = Theme.of(context).textTheme.labelSmall;
-    return Text(text, style: color != null ? style?.copyWith(color: color) : style);
+    return Text(
+      text,
+      style: color != null ? style?.copyWith(color: color) : style,
+    );
   }
 }
 
@@ -96,6 +112,9 @@ class AppAmount extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final onBackground = Theme.of(context).colorScheme.onSurface;
-    return Text(text, style: AppTextStyles.displayLarge.copyWith(color: color ?? onBackground));
+    return Text(
+      text,
+      style: AppTextStyles.displayLarge.copyWith(color: color ?? onBackground),
+    );
   }
 }

@@ -12,7 +12,14 @@ import '../../../../shared/widgets/text/app_text.dart';
 import '../../../../core/products/entities/product.dart';
 import '../cubit/products_cubit.dart';
 
-const _categories = ['Abarrotes', 'Bebidas', 'Snacks', 'Limpieza', 'Cuidado personal', 'Otros'];
+const _categories = [
+  'Abarrotes',
+  'Bebidas',
+  'Snacks',
+  'Limpieza',
+  'Cuidado personal',
+  'Otros',
+];
 
 class ProductNewScreen extends StatefulWidget {
   const ProductNewScreen({super.key, this.product});
@@ -27,10 +34,18 @@ class ProductNewScreen extends StatefulWidget {
 class _ProductNewScreenState extends State<ProductNewScreen> {
   final _formKey = GlobalKey<FormState>();
   late final _nameCtrl = TextEditingController(text: widget.product?.name);
-  late final _priceCtrl = TextEditingController(text: widget.product?.price?.toStringAsFixed(2));
-  late final _stockCtrl = TextEditingController(text: widget.product?.stock?.toStringAsFixed(2));
-  late final _minStockCtrl = TextEditingController(text: widget.product?.minStock?.toStringAsFixed(2));
-  late final _costCtrl = TextEditingController(text: widget.product?.cost?.toStringAsFixed(2));
+  late final _priceCtrl = TextEditingController(
+    text: widget.product?.price?.toStringAsFixed(2),
+  );
+  late final _stockCtrl = TextEditingController(
+    text: widget.product?.stock?.toStringAsFixed(2),
+  );
+  late final _minStockCtrl = TextEditingController(
+    text: widget.product?.minStock?.toStringAsFixed(2),
+  );
+  late final _costCtrl = TextEditingController(
+    text: widget.product?.cost?.toStringAsFixed(2),
+  );
   late bool _trackStock = widget.product?.trackStock ?? false;
   late SellMode _mode = widget.product?.mode ?? SellMode.unit;
   late String _category = widget.product?.category ?? 'Otros';
@@ -71,21 +86,29 @@ class _ProductNewScreenState extends State<ProductNewScreen> {
     setState(() => _saving = true);
     try {
       final cubit = context.read<ProductsCubit>();
-      final price = _mode == SellMode.amount ? null : double.tryParse(_priceCtrl.text.trim());
+      final price = _mode == SellMode.amount
+          ? null
+          : double.tryParse(_priceCtrl.text.trim());
       final cost = double.tryParse(_costCtrl.text.trim());
-      final stock = _trackStock ? double.tryParse(_stockCtrl.text.trim()) : null;
-      final minStock = _trackStock ? double.tryParse(_minStockCtrl.text.trim()) : null;
+      final stock = _trackStock
+          ? double.tryParse(_stockCtrl.text.trim())
+          : null;
+      final minStock = _trackStock
+          ? double.tryParse(_minStockCtrl.text.trim())
+          : null;
       if (_isEditing) {
-        await cubit.updateProduct(widget.product!.copyWith(
-          name: _nameCtrl.text.trim(),
-          price: price,
-          cost: cost,
-          mode: _mode,
-          category: _category,
-          trackStock: _trackStock,
-          stock: stock,
-          minStock: minStock,
-        ));
+        await cubit.updateProduct(
+          widget.product!.copyWith(
+            name: _nameCtrl.text.trim(),
+            price: price,
+            cost: cost,
+            mode: _mode,
+            category: _category,
+            trackStock: _trackStock,
+            stock: stock,
+            minStock: minStock,
+          ),
+        );
       } else {
         await cubit.addProduct(
           name: _nameCtrl.text.trim(),
@@ -99,12 +122,18 @@ class _ProductNewScreenState extends State<ProductNewScreen> {
         );
       }
       if (!mounted) return;
-      AppNotification.success(context, _isEditing ? 'Producto actualizado' : 'Producto guardado');
+      AppNotification.success(
+        context,
+        _isEditing ? 'Producto actualizado' : 'Producto guardado',
+      );
       Navigator.of(context).pop();
     } catch (e, st) {
       debugPrint('save product failed: $e\n$st');
       if (!mounted) return;
-      AppNotification.error(context, 'No se pudo guardar el producto. Intenta de nuevo.');
+      AppNotification.error(
+        context,
+        'No se pudo guardar el producto. Intenta de nuevo.',
+      );
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -117,7 +146,12 @@ class _ProductNewScreenState extends State<ProductNewScreen> {
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(16, 12, 16, 24 + MediaQuery.of(context).viewInsets.bottom),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            12,
+            16,
+            24 + MediaQuery.of(context).viewInsets.bottom,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -126,7 +160,9 @@ class _ProductNewScreenState extends State<ProductNewScreen> {
               TextFormField(
                 controller: _nameCtrl,
                 decoration: const InputDecoration(hintText: 'Ej. Salami'),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Ponle un nombre al producto' : null,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Ponle un nombre al producto'
+                    : null,
               ),
               const SizedBox(height: 14),
               if (_mode != SellMode.amount) ...[
@@ -134,15 +170,25 @@ class _ProductNewScreenState extends State<ProductNewScreen> {
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: _priceCtrl,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
-                  decoration: const InputDecoration(prefixText: 'RD\$  ', hintText: '0'),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                  ],
+                  decoration: const InputDecoration(
+                    prefixText: 'RD\$  ',
+                    hintText: '0',
+                  ),
                   validator: (v) => _requiredNumberValidator(v),
                 ),
                 const SizedBox(height: 16),
               ],
               AppCard(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     const Expanded(
@@ -165,7 +211,8 @@ class _ProductNewScreenState extends State<ProductNewScreen> {
                       _NumberField(
                         label: 'Stock actual',
                         controller: _stockCtrl,
-                        validator: (v) => _requiredNumberValidator(v, allowZero: true),
+                        validator: (v) =>
+                            _requiredNumberValidator(v, allowZero: true),
                       ),
                       const SizedBox(height: 12),
                       _NumberField(
@@ -243,7 +290,11 @@ class _ProductNewScreenState extends State<ProductNewScreen> {
 }
 
 class _NumberField extends StatelessWidget {
-  const _NumberField({required this.label, required this.controller, this.validator});
+  const _NumberField({
+    required this.label,
+    required this.controller,
+    this.validator,
+  });
   final String label;
   final TextEditingController controller;
   final String? Function(String?)? validator;
@@ -258,7 +309,9 @@ class _NumberField extends StatelessWidget {
         TextFormField(
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+          ],
           decoration: const InputDecoration(hintText: '0'),
           validator: validator,
         ),

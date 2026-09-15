@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/products/entities/product.dart';
 import '../../../../core/utils/money.dart';
-import '../../../../shared/theme/app_colors.dart';
-import '../../../../shared/theme/app_decorations.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
+import '../../../../shared/widgets/buttons/selectable_chip.dart';
+import '../../../../shared/widgets/inputs/app_boxed_field.dart';
 import '../../../../shared/widgets/text/app_text.dart';
 
 Future<void> showAmountModal(
@@ -16,13 +16,17 @@ Future<void> showAmountModal(
   final controller = TextEditingController(
     text: initialAmount == null
         ? ''
-        : (initialAmount % 1 == 0 ? initialAmount.toStringAsFixed(0) : initialAmount.toString()),
+        : (initialAmount % 1 == 0
+              ? initialAmount.toStringAsFixed(0)
+              : initialAmount.toString()),
   );
   return showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     backgroundColor: Theme.of(context).colorScheme.surface,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(22))),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+    ),
     builder: (ctx) {
       return Padding(
         padding: EdgeInsets.only(
@@ -47,8 +51,9 @@ Future<void> showAmountModal(
               mainAxisSpacing: 10,
               childAspectRatio: 2.6,
               children: [50, 100, 150, 200].map((v) {
-                return _QuickAmount(
+                return SelectableChip(
                   label: Money.label(v),
+                  selected: false,
                   onTap: () {
                     onConfirm(v.toDouble());
                     Navigator.of(ctx).pop();
@@ -59,15 +64,12 @@ Future<void> showAmountModal(
             const SizedBox(height: 14),
             const AppLabel('Otro monto'),
             const SizedBox(height: 6),
-            Container(
-              decoration: BoxDecoration(color: AppColors.backgroundLight, borderRadius: BorderRadius.circular(AppDecorations.radius)),
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              child: TextField(
-                controller: controller,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                decoration: const InputDecoration(border: InputBorder.none, prefixText: 'RD\$  ', hintText: '0'),
+            AppBoxedField(
+              controller: controller,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
               ),
+              prefixText: 'RD\$  ',
             ),
             const SizedBox(height: 14),
             SizedBox(
@@ -87,22 +89,4 @@ Future<void> showAmountModal(
       );
     },
   );
-}
-
-class _QuickAmount extends StatelessWidget {
-  const _QuickAmount({required this.label, required this.onTap});
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        alignment: Alignment.center,
-        decoration: BoxDecoration(color: AppColors.backgroundLight, borderRadius: BorderRadius.circular(AppDecorations.radius)),
-        child: Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-      ),
-    );
-  }
 }

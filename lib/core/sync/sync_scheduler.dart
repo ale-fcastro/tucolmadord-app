@@ -64,12 +64,14 @@ class SyncScheduler {
     if (rows.isEmpty) return false;
 
     final operations = rows
-        .map((row) => {
-              'entityType': row['entity_type'],
-              'entityId': row['entity_id'],
-              'operation': row['operation'],
-              'payload': jsonDecode(row['payload_json'] as String),
-            })
+        .map(
+          (row) => {
+            'entityType': row['entity_type'],
+            'entityId': row['entity_id'],
+            'operation': row['operation'],
+            'payload': jsonDecode(row['payload_json'] as String),
+          },
+        )
         .toList();
 
     final accepted = await _repository.push(operations);

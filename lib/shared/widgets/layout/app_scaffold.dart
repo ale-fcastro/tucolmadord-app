@@ -29,7 +29,9 @@ class AppScaffold extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
-        leading: showBackButton && onBack != null ? BackButton(onPressed: onBack) : null,
+        leading: showBackButton && onBack != null
+            ? BackButton(onPressed: onBack)
+            : null,
         automaticallyImplyLeading: showBackButton && onBack == null,
         actions: actions,
       ),

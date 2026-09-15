@@ -17,11 +17,7 @@ class AppDatabase {
   Future<Database> _open() async {
     configureDatabaseFactory();
     final path = join(await getDatabasesPath(), 'tucolmadord.db');
-    return openDatabase(
-      path,
-      version: 1,
-      onCreate: _onCreate,
-    );
+    return openDatabase(path, version: 1, onCreate: _onCreate);
   }
 
   Future<void> _onCreate(Database db, int version) async {

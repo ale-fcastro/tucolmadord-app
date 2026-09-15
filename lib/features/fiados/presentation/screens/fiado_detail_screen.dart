@@ -18,7 +18,11 @@ import '../cubit/fiados_cubit.dart';
 import '../widgets/pago_modal.dart';
 
 class FiadoDetailScreen extends StatelessWidget {
-  const FiadoDetailScreen({super.key, required this.customerId, required this.parentCubit});
+  const FiadoDetailScreen({
+    super.key,
+    required this.customerId,
+    required this.parentCubit,
+  });
 
   final String customerId;
   final FiadosCubit parentCubit;
@@ -42,7 +46,9 @@ class _FiadoDetailView extends StatelessWidget {
       builder: (context, state) {
         final cubit = context.read<FiadoDetailCubit>();
         if (state.loading || state.customer == null) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
         final customer = state.customer!;
         return PopScope(
@@ -65,7 +71,9 @@ class _FiadoDetailView extends StatelessWidget {
                               const AppLabel('Te debe'),
                               AppAmount(
                                 Money.label(customer.balance),
-                                color: customer.balance > 0 ? AppColors.error : AppColors.success,
+                                color: customer.balance > 0
+                                    ? AppColors.error
+                                    : AppColors.success,
                               ),
                             ],
                           ),
@@ -80,33 +88,52 @@ class _FiadoDetailView extends StatelessWidget {
                               icon: Icons.receipt_long_outlined,
                             )
                           : AppCard(
-                              padding: const EdgeInsets.symmetric(horizontal: 14),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                              ),
                               child: Column(
                                 children: state.movements.map((m) {
-                                  final isPago = m.type == FiadoMovementType.pago;
+                                  final isPago =
+                                      m.type == FiadoMovementType.pago;
                                   return Container(
-                                    padding: const EdgeInsets.symmetric(vertical: 10),
-                                    decoration: AppDecorations.rowDivider(context),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 10,
+                                    ),
+                                    decoration: AppDecorations.rowDivider(
+                                      context,
+                                    ),
                                     child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
-                                              AppDescription(m.note ?? (isPago ? 'Pago recibido' : 'Compra')),
+                                              AppDescription(
+                                                m.note ??
+                                                    (isPago
+                                                        ? 'Pago recibido'
+                                                        : 'Compra'),
+                                              ),
                                               const SizedBox(height: 2),
                                               AppLabel(
                                                 dateTimeLabel(m.createdAt),
-                                                color: Theme.of(context).colorScheme.outline,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .outline,
                                               ),
                                             ],
                                           ),
                                         ),
                                         AppSubtitle(
                                           '${isPago ? '−' : '+'}${Money.label(m.amount)}',
-                                          color: isPago ? AppColors.success : AppColors.error,
+                                          color: isPago
+                                              ? AppColors.success
+                                              : AppColors.error,
                                         ),
                                       ],
                                     ),
@@ -119,10 +146,14 @@ class _FiadoDetailView extends StatelessWidget {
                 ),
                 Container(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                  decoration: AppDecorations.topDivider(context).copyWith(color: Theme.of(context).colorScheme.surface),
+                  decoration: AppDecorations.topDivider(context)
+                      .copyWith(color: Theme.of(context).colorScheme.surface),
                   child: SizedBox(
                     width: double.infinity,
-                    child: PrimaryButton(label: 'REGISTRAR PAGO', onPressed: () => showPagoModal(context, cubit)),
+                    child: PrimaryButton(
+                      label: 'REGISTRAR PAGO',
+                      onPressed: () => showPagoModal(context, cubit),
+                    ),
                   ),
                 ),
               ],

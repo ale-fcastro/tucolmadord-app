@@ -17,14 +17,17 @@ class DuplicateEmailException extends ApiException {
 
 /// 401 en `/auth/login` — credenciales incorrectas (o body vacío).
 class InvalidCredentialsException extends ApiException {
-  InvalidCredentialsException([super.message = 'Correo o contraseña incorrectos.']);
+  InvalidCredentialsException([
+    super.message = 'Correo o contraseña incorrectos.',
+  ]);
 }
 
 /// 403 `EMAIL_NOT_CONFIRMED` en `/auth/login` — credenciales válidas pero el
 /// correo todavía no fue confirmado. La UI debe redirigir a la pantalla de
 /// verificación con este correo precargado.
 class EmailNotConfirmedException extends ApiException {
-  EmailNotConfirmedException({required this.email, required String message}) : super(message);
+  EmailNotConfirmedException({required this.email, required String message})
+    : super(message);
 
   final String email;
 }

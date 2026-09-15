@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Sin esto, los builds de release (a diferencia de debug/profile, que
+         Flutter la agrega solo para ellos) no pueden hacer ninguna llamada
+         de red — ni al backend ni a Google Sign-In. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <!-- image_picker: tomar foto para el logo del negocio en Datos del negocio. -->
     <uses-permission android:name="android.permission.CAMERA"/>
     <application

@@ -11,7 +11,8 @@ import '../config/api_config.dart';
 /// manda lo que le pasan y devuelve, en el mismo orden, qué operaciones
 /// aceptó el servidor.
 class SyncRepository {
-  SyncRepository(this._session, {http.Client? client}) : _client = client ?? http.Client();
+  SyncRepository(this._session, {http.Client? client})
+    : _client = client ?? http.Client();
 
   final AuthSessionStore _session;
   final http.Client _client;
@@ -33,7 +34,9 @@ class SyncRepository {
 
     final body = jsonDecode(response.body) as Map<String, dynamic>;
     final results = body['results'] as List? ?? const [];
-    return results.map((e) => (e as Map<String, dynamic>)['accepted'] == true).toList();
+    return results
+        .map((e) => (e as Map<String, dynamic>)['accepted'] == true)
+        .toList();
   }
 
   Future<Map<String, String>> _authHeaders() async {

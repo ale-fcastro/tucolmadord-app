@@ -33,7 +33,12 @@ class Authenticating extends AuthState {
 /// Falta confirmar el correo — ya sea recién registrado o porque el login
 /// devolvió `EMAIL_NOT_CONFIRMED`. `email` se precarga en VerifyEmailScreen.
 class NeedsVerification extends AuthState {
-  const NeedsVerification({required this.email, this.isSubmitting = false, this.error, this.info});
+  const NeedsVerification({
+    required this.email,
+    this.isSubmitting = false,
+    this.error,
+    this.info,
+  });
 
   final String email;
 
@@ -52,4 +57,29 @@ class Authenticated extends AuthState {
   const Authenticated(this.session);
 
   final AuthSessionData session;
+}
+
+/// Se autenticó con Google pero el correo no tenía cuenta — falta el nombre
+/// del negocio y el teléfono para crearla. `registrationToken` viaja de
+/// vuelta al backend en `CompleteGoogleRegistrationScreen` y expira a los 10
+/// minutos.
+class NeedsGoogleBusinessInfo extends AuthState {
+  const NeedsGoogleBusinessInfo({
+    required this.registrationToken,
+    required this.email,
+    required this.fullName,
+    this.isSubmitting = false,
+    this.error,
+    this.fieldErrors,
+  });
+
+  final String registrationToken;
+  final String email;
+  final String fullName;
+
+  /// true mientras se envía el formulario (para el botón "Crear cuenta").
+  final bool isSubmitting;
+
+  final String? error;
+  final Map<String, List<String>>? fieldErrors;
 }

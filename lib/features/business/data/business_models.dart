@@ -25,7 +25,8 @@ class BusinessProfile {
 
   bool get isOwner => role == 'Owner';
 
-  factory BusinessProfile.fromJson(Map<String, dynamic> json) => BusinessProfile(
+  factory BusinessProfile.fromJson(Map<String, dynamic> json) =>
+      BusinessProfile(
         id: json['id']?.toString() ?? '',
         name: json['name']?.toString() ?? '',
         rnc: json['rnc']?.toString(),
@@ -36,12 +37,12 @@ class BusinessProfile {
       );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'rnc': rnc,
-        'address': address,
-        'phone': phone,
-        'logoBase64': logoBase64,
-        'role': role,
-      };
+    'id': id,
+    'name': name,
+    'rnc': rnc,
+    'address': address,
+    'phone': phone,
+    'logoBase64': logoBase64,
+    'role': role,
+  };
 }

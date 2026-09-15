@@ -24,13 +24,20 @@ class ClosingRepository {
 
   static const _timeout = Duration(seconds: 20);
 
-  ClosingRepository(this._appDatabase, this._session, {http.Client? client}) : _client = client ?? http.Client();
+  ClosingRepository(this._appDatabase, this._session, {http.Client? client})
+    : _client = client ?? http.Client();
 
   Future<DaySummary> getTodaySummary() async {
     final db = await _appDatabase.database;
-    final startOfDay = DateTime.now().copyWith(hour: 0, minute: 0, second: 0, millisecond: 0).toIso8601String();
+    final startOfDay = DateTime.now()
+        .copyWith(hour: 0, minute: 0, second: 0, millisecond: 0)
+        .toIso8601String();
 
-    final salesRows = await db.query('sales', where: 'created_at >= ?', whereArgs: [startOfDay]);
+    final salesRows = await db.query(
+      'sales',
+      where: 'created_at >= ?',
+      whereArgs: [startOfDay],
+    );
     double cash = 0, transfer = 0, fiado = 0, total = 0;
     for (final row in salesRows) {
       final amount = (row['total'] as num).toDouble();
@@ -45,13 +52,16 @@ class ClosingRepository {
       }
     }
 
-    final profitRows = await db.rawQuery('''
+    final profitRows = await db.rawQuery(
+      '''
       SELECT si.line_total AS line_total, si.quantity AS quantity, p.cost AS cost
       FROM sale_items si
       JOIN sales s ON si.sale_id = s.id
       LEFT JOIN products p ON si.product_id = p.id
       WHERE s.created_at >= ?
-    ''', [startOfDay]);
+    ''',
+      [startOfDay],
+    );
     double profit = 0;
     for (final row in profitRows) {
       final lineTotal = (row['line_total'] as num).toDouble();
@@ -60,10 +70,21 @@ class ClosingRepository {
       profit += lineTotal - (cost != null ? cost * quantity : 0);
     }
 
-    final expenseRows = await db.query('expenses', where: 'created_at >= ?', whereArgs: [startOfDay]);
-    final expensesTotal = expenseRows.fold<double>(0, (sum, row) => sum + (row['amount'] as num).toDouble());
+    final expenseRows = await db.query(
+      'expenses',
+      where: 'created_at >= ?',
+      whereArgs: [startOfDay],
+    );
+    final expensesTotal = expenseRows.fold<double>(
+      0,
+      (sum, row) => sum + (row['amount'] as num).toDouble(),
+    );
 
-    final closedRows = await db.query('cash_closings', where: 'date = ?', whereArgs: [_todayKey()]);
+    final closedRows = await db.query(
+      'cash_closings',
+      where: 'date = ?',
+      whereArgs: [_todayKey()],
+    );
 
     return DaySummary(
       totalSales: total,
@@ -123,7 +144,10 @@ class ClosingRepository {
     if (response.statusCode == 200) return;
 
     final body = _decode(response);
-    throw ApiException(_message(body) ?? 'No se pudo enviar el reporte (${response.statusCode}).');
+    throw ApiException(
+      _message(body) ??
+          'No se pudo enviar el reporte (${response.statusCode}).',
+    );
   }
 
   Map<String, dynamic> _decode(http.Response response) {

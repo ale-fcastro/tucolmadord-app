@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+
 import '../../theme/app_decorations.dart';
 
 /// Barra de búsqueda estándar — antes cada pantalla (inventario, fiados,
 /// vender) reconstruía el mismo Container+TextField a mano.
 class AppSearchField extends StatelessWidget {
-  const AppSearchField({super.key, required this.hintText, required this.onChanged});
+  const AppSearchField({
+    super.key,
+    required this.hintText,
+    required this.onChanged,
+  });
 
   final String hintText;
   final ValueChanged<String> onChanged;

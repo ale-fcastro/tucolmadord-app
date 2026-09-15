@@ -8,22 +8,33 @@ class FiadosState {
   final List<Customer> customers;
   final String search;
 
-  const FiadosState({this.loading = true, this.customers = const [], this.search = ''});
+  const FiadosState({
+    this.loading = true,
+    this.customers = const [],
+    this.search = '',
+  });
 
-  double get totalPending => customers.fold<double>(0, (sum, c) => sum + c.balance);
+  double get totalPending =>
+      customers.fold<double>(0, (sum, c) => sum + c.balance);
 
   List<Customer> get visible {
     final q = search.toLowerCase();
-    final filtered = search.isEmpty ? customers : customers.where((c) => c.name.toLowerCase().contains(q));
+    final filtered = search.isEmpty
+        ? customers
+        : customers.where((c) => c.name.toLowerCase().contains(q));
     // Los que más deben aparecen primero; los saldados quedan al final, discretos.
     return filtered.toList()..sort((a, b) => b.balance.compareTo(a.balance));
   }
 
-  FiadosState copyWith({bool? loading, List<Customer>? customers, String? search}) => FiadosState(
-        loading: loading ?? this.loading,
-        customers: customers ?? this.customers,
-        search: search ?? this.search,
-      );
+  FiadosState copyWith({
+    bool? loading,
+    List<Customer>? customers,
+    String? search,
+  }) => FiadosState(
+    loading: loading ?? this.loading,
+    customers: customers ?? this.customers,
+    search: search ?? this.search,
+  );
 }
 
 class FiadosCubit extends Cubit<FiadosState> {

@@ -14,18 +14,18 @@ class Expense {
   });
 
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'amount': amount,
-        'concept': concept,
-        'category': category,
-        'created_at': createdAt.toIso8601String(),
-      };
+    'id': id,
+    'amount': amount,
+    'concept': concept,
+    'category': category,
+    'created_at': createdAt.toIso8601String(),
+  };
 
   factory Expense.fromMap(Map<String, dynamic> map) => Expense(
-        id: map['id'] as String,
-        amount: (map['amount'] as num).toDouble(),
-        concept: map['concept'] as String,
-        category: map['category'] as String,
-        createdAt: DateTime.parse(map['created_at'] as String),
-      );
+    id: map['id'] as String,
+    amount: (map['amount'] as num).toDouble(),
+    concept: map['concept'] as String,
+    category: map['category'] as String,
+    createdAt: DateTime.parse(map['created_at'] as String),
+  );
 }

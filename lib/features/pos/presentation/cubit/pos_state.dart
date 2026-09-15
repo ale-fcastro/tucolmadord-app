@@ -29,9 +29,11 @@ class PosState {
   });
 
   double get cartTotal => cart.fold<double>(0, (sum, l) => sum + l.lineTotal);
-  int get cartCount => cart.fold<int>(0, (sum, l) => sum + (l.isUnit ? l.quantity.round() : 1));
+  int get cartCount =>
+      cart.fold<int>(0, (sum, l) => sum + (l.isUnit ? l.quantity.round() : 1));
   bool get cartHasItems => cart.isNotEmpty;
-  double get changeAmount => (receivedAmount - cartTotal).clamp(0, double.infinity);
+  double get changeAmount =>
+      (receivedAmount - cartTotal).clamp(0, double.infinity);
 
   /// Diferencia real entre lo recibido y el total, sin recortar — negativa
   /// cuando el cliente paga de menos. Úsese para mostrar en pantalla; para
@@ -89,7 +91,9 @@ class PosState {
       cart: cart ?? this.cart,
       paymentMethod: paymentMethod ?? this.paymentMethod,
       receivedAmount: receivedAmount ?? this.receivedAmount,
-      selectedCustomerId: clearSelectedCustomerId ? null : (selectedCustomerId ?? this.selectedCustomerId),
+      selectedCustomerId: clearSelectedCustomerId
+          ? null
+          : (selectedCustomerId ?? this.selectedCustomerId),
       lastSale: lastSale ?? this.lastSale,
     );
   }

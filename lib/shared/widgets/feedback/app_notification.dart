@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../theme/app_colors.dart';
 
 /// Snackbar flotante estilizada, con variantes semánticas. Reemplaza los
@@ -19,7 +20,12 @@ class AppNotification {
   static void info(BuildContext context, String message) =>
       _show(context, message, AppColors.info, Icons.info_outline);
 
-  static void _show(BuildContext context, String message, Color color, IconData icon) {
+  static void _show(
+    BuildContext context,
+    String message,
+    Color color,
+    IconData icon,
+  ) {
     final messenger = ScaffoldMessenger.of(context);
     messenger.hideCurrentSnackBar();
     messenger.showSnackBar(

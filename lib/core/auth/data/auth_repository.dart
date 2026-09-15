@@ -39,7 +39,9 @@ class AuthRepository {
       );
     }
     if (response.statusCode == 409) {
-      throw DuplicateEmailException(_message(body) ?? 'Ya existe una cuenta con ese correo.');
+      throw DuplicateEmailException(
+        _message(body) ?? 'Ya existe una cuenta con ese correo.',
+      );
     }
     if (response.statusCode == 400) {
       final errors = body['errors'];
@@ -48,11 +50,20 @@ class AuthRepository {
       }
       throw ApiException(_message(body) ?? 'Revisa los datos ingresados.');
     }
-    throw ApiException(_message(body) ?? 'No se pudo completar el registro (${response.statusCode}).');
+    throw ApiException(
+      _message(body) ??
+          'No se pudo completar el registro (${response.statusCode}).',
+    );
   }
 
-  Future<AuthSessionData> verifyEmail({required String email, required String code}) async {
-    final response = await _postJson('/auth/verify-email', {'email': email, 'code': code});
+  Future<AuthSessionData> verifyEmail({
+    required String email,
+    required String code,
+  }) async {
+    final response = await _postJson('/auth/verify-email', {
+      'email': email,
+      'code': code,
+    });
     final body = _decode(response);
 
     if (response.statusCode == 200) return AuthSessionData.fromJson(body);
@@ -60,17 +71,28 @@ class AuthRepository {
   }
 
   Future<String> resendVerification({required String email}) async {
-    final response = await _postJson('/auth/resend-verification', {'email': email});
+    final response = await _postJson('/auth/resend-verification', {
+      'email': email,
+    });
     final body = _decode(response);
 
     if (response.statusCode == 200) {
       return _message(body) ?? 'Código reenviado. Revisa tu correo.';
     }
-    throw ApiException(_message(body) ?? 'No se pudo reenviar el código. Intenta de nuevo en un momento.');
+    throw ApiException(
+      _message(body) ??
+          'No se pudo reenviar el código. Intenta de nuevo en un momento.',
+    );
   }
 
-  Future<AuthSessionData> login({required String email, required String password}) async {
-    final response = await _postJson('/auth/login', {'email': email, 'password': password});
+  Future<AuthSessionData> login({
+    required String email,
+    required String password,
+  }) async {
+    final response = await _postJson('/auth/login', {
+      'email': email,
+      'password': password,
+    });
 
     if (response.statusCode == 200) {
       return AuthSessionData.fromJson(_decode(response));
@@ -78,7 +100,8 @@ class AuthRepository {
     if (response.statusCode == 403) {
       final body = _decode(response);
       final code = body['code']?.toString();
-      final message = _message(body) ?? 'Debes verificar tu correo antes de continuar.';
+      final message =
+          _message(body) ?? 'Debes verificar tu correo antes de continuar.';
       if (code == 'EMAIL_NOT_CONFIRMED') {
         throw EmailNotConfirmedException(email: email, message: message);
       }
@@ -88,6 +111,76 @@ class AuthRepository {
       throw InvalidCredentialsException();
     }
     throw ApiException('No se pudo iniciar sesión (${response.statusCode}).');
+  }
+
+  /// Valida el ID token de Google con el backend. 200 = el correo ya tenía
+  /// cuenta y devuelve una sesión normal; 202 = correo nuevo, devuelve el
+  /// ticket que hay que completar con `completeGoogleRegistration`.
+  Future<GoogleAuthResult> googleAuth({required String idToken}) async {
+    final response = await _postJson('/auth/google', {'idToken': idToken});
+
+    if (response.statusCode == 200) {
+      return GoogleAuthResult.session(
+        AuthSessionData.fromJson(_decode(response)),
+      );
+    }
+    if (response.statusCode == 202) {
+      final body = _decode(response);
+      return GoogleAuthResult.pendingRegistration(
+        GooglePendingRegistration(
+          registrationToken: body['registrationToken']?.toString() ?? '',
+          email: body['email']?.toString() ?? '',
+          fullName: body['fullName']?.toString() ?? '',
+        ),
+      );
+    }
+    if (response.statusCode == 403) {
+      final body = _decode(response);
+      throw ApiException(
+        _message(body) ?? 'No se pudo iniciar sesión con Google.',
+      );
+    }
+    if (response.statusCode == 401) {
+      throw ApiException(
+        'No se pudo iniciar sesión con Google. Intenta de nuevo.',
+      );
+    }
+    throw ApiException(
+      'No se pudo iniciar sesión con Google (${response.statusCode}).',
+    );
+  }
+
+  /// Crea la cuenta + negocio para un correo de Google sin cuenta todavía,
+  /// usando el ticket que devolvió `googleAuth`.
+  Future<AuthSessionData> completeGoogleRegistration({
+    required String registrationToken,
+    required String businessName,
+    required String phone,
+  }) async {
+    final response = await _postJson('/auth/google/register', {
+      'registrationToken': registrationToken,
+      'businessName': businessName,
+      'phone': phone,
+    });
+    final body = _decode(response);
+
+    if (response.statusCode == 200) return AuthSessionData.fromJson(body);
+    if (response.statusCode == 403) {
+      throw ApiException(
+        _message(body) ?? 'No se pudo completar el registro con Google.',
+      );
+    }
+    if (response.statusCode == 400) {
+      final errors = body['errors'];
+      if (errors is Map) {
+        throw ValidationException(_parseFieldErrors(errors));
+      }
+      throw ApiException(_message(body) ?? 'Revisa los datos ingresados.');
+    }
+    throw ApiException(
+      _message(body) ??
+          'No se pudo completar el registro (${response.statusCode}).',
+    );
   }
 
   Future<http.Response> _postJson(String path, Map<String, dynamic> body) {

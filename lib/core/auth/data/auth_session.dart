@@ -7,7 +7,8 @@ import 'auth_models.dart';
 /// Persiste la sesión (token + datos de usuario/negocio) en almacenamiento
 /// seguro del dispositivo, para no pedir login en cada apertura de la app.
 class AuthSessionStore {
-  AuthSessionStore({FlutterSecureStorage? storage}) : _storage = storage ?? const FlutterSecureStorage();
+  AuthSessionStore({FlutterSecureStorage? storage})
+    : _storage = storage ?? const FlutterSecureStorage();
 
   final FlutterSecureStorage _storage;
 

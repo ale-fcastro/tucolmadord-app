@@ -49,7 +49,8 @@ class _GastosHistorialScreenState extends State<GastosHistorialScreen> {
               onAction: _reload,
             );
           }
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          if (!snapshot.hasData)
+            return const Center(child: CircularProgressIndicator());
           final expenses = snapshot.data!;
           final total = expenses.fold<double>(0, (s, e) => s + e.amount);
           return ListView(
@@ -57,13 +58,19 @@ class _GastosHistorialScreenState extends State<GastosHistorialScreen> {
             children: [
               AppCard(
                 color: AppColors.infoBg,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 child: SizedBox(
                   width: double.infinity,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const AppLabel('Gastos totales (histórico)', color: AppColors.info),
+                      const AppLabel(
+                        'Gastos totales (histórico)',
+                        color: AppColors.info,
+                      ),
                       AppTitle(Money.label(total), color: AppColors.info),
                     ],
                   ),
@@ -94,7 +101,9 @@ class _GastosHistorialScreenState extends State<GastosHistorialScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   AppSubtitle(e.concept),
-                                  AppLabel('${e.category} · ${dateTimeLabel(e.createdAt)}'),
+                                  AppLabel(
+                                    '${e.category} · ${dateTimeLabel(e.createdAt)}',
+                                  ),
                                 ],
                               ),
                             ),

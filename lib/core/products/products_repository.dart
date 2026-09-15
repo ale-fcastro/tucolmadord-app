@@ -49,14 +49,25 @@ class ProductsRepository {
   }
 
   /// Descuenta stock dentro de una transacción existente (usado al vender).
-  Future<void> adjustStock(Transaction txn, String productId, double delta) async {
-    final rows = await txn.query('products', where: 'id = ?', whereArgs: [productId]);
+  Future<void> adjustStock(
+    Transaction txn,
+    String productId,
+    double delta,
+  ) async {
+    final rows = await txn.query(
+      'products',
+      where: 'id = ?',
+      whereArgs: [productId],
+    );
     if (rows.isEmpty) return;
     final current = (rows.first['stock'] as num?)?.toDouble();
     if (current == null) return;
     await txn.update(
       'products',
-      {'stock': current + delta, 'updated_at': DateTime.now().toIso8601String()},
+      {
+        'stock': current + delta,
+        'updated_at': DateTime.now().toIso8601String(),
+      },
       where: 'id = ?',
       whereArgs: [productId],
     );

@@ -12,7 +12,10 @@ class ExpensesState {
   double get todayTotal => today.fold<double>(0, (sum, e) => sum + e.amount);
 
   ExpensesState copyWith({bool? loading, List<Expense>? today}) =>
-      ExpensesState(loading: loading ?? this.loading, today: today ?? this.today);
+      ExpensesState(
+        loading: loading ?? this.loading,
+        today: today ?? this.today,
+      );
 }
 
 class ExpensesCubit extends Cubit<ExpensesState> {
@@ -33,7 +36,11 @@ class ExpensesCubit extends Cubit<ExpensesState> {
 
   /// Puede lanzar si el repositorio falla; el llamador (la pantalla) debe
   /// capturar el error y mostrar feedback al usuario.
-  Future<void> addExpense({required double amount, required String concept, required String category}) async {
+  Future<void> addExpense({
+    required double amount,
+    required String concept,
+    required String category,
+  }) async {
     await _repository.add(amount: amount, concept: concept, category: category);
     await load();
   }

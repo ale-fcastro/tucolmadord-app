@@ -11,7 +11,8 @@ class BusinessCubit extends Cubit<BusinessState> {
 
   final BusinessProfileStore _store;
 
-  static const _connectionErrorMessage = 'No se pudo conectar con el servidor. Intenta de nuevo.';
+  static const _connectionErrorMessage =
+      'No se pudo conectar con el servidor. Intenta de nuevo.';
 
   Future<void> load() async {
     emit(state.copyWith(loading: true, profile: _store.cached));

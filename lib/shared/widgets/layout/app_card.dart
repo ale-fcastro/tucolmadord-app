@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../theme/app_decorations.dart';
 
 /// Contenedor de card consistente — mismo radio y sombra en toda la app, y

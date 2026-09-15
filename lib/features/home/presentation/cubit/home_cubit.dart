@@ -35,44 +35,57 @@ class HomeCubit extends Cubit<HomeState> {
       final customers = await _customersRepository.getAll();
 
       final activity = <ActivityItem>[
-        ...sales.map((s) => ActivityItem(
-              type: ActivityType.sale,
-              title: 'Venta #${s.id.substring(0, 6)}',
-              time: s.createdAt,
-              amount: s.total,
-            )),
-        ...payments.map((p) => ActivityItem(
-              type: ActivityType.payment,
-              title: 'Pago de fiado — ${p['customer_name']}',
-              time: DateTime.parse(p['created_at'] as String),
-              amount: (p['amount'] as num).toDouble(),
-            )),
-        ...expenses.map((e) => ActivityItem(
-              type: ActivityType.expense,
-              title: 'Gasto — ${e.concept}',
-              time: e.createdAt,
-              amount: e.amount,
-            )),
+        ...sales.map(
+          (s) => ActivityItem(
+            type: ActivityType.sale,
+            title: 'Venta #${s.id.substring(0, 6)}',
+            time: s.createdAt,
+            amount: s.total,
+          ),
+        ),
+        ...payments.map(
+          (p) => ActivityItem(
+            type: ActivityType.payment,
+            title: 'Pago de fiado — ${p['customer_name']}',
+            time: DateTime.parse(p['created_at'] as String),
+            amount: (p['amount'] as num).toDouble(),
+          ),
+        ),
+        ...expenses.map(
+          (e) => ActivityItem(
+            type: ActivityType.expense,
+            title: 'Gasto — ${e.concept}',
+            time: e.createdAt,
+            amount: e.amount,
+          ),
+        ),
       ]..sort((a, b) => b.time.compareTo(a.time));
 
-      final todayExpensesTotal = expenses.fold<double>(0, (sum, e) => sum + e.amount);
+      final todayExpensesTotal = expenses.fold<double>(
+        0,
+        (sum, e) => sum + e.amount,
+      );
 
-      emit(state.copyWith(
-        loading: false,
-        hasLoadedOnce: true,
-        error: null,
-        todaySales: summary.totalSales,
-        estimatedProfit: summary.estimatedProfit,
-        fiadoPending: _customersRepository.totalPending(customers),
-        todayExpenses: todayExpensesTotal,
-        lowStockCount: products.where((p) => p.isLowStock).length,
-        recentActivity: activity.take(3).toList(),
-      ));
+      emit(
+        state.copyWith(
+          loading: false,
+          hasLoadedOnce: true,
+          error: null,
+          todaySales: summary.totalSales,
+          estimatedProfit: summary.estimatedProfit,
+          fiadoPending: _customersRepository.totalPending(customers),
+          todayExpenses: todayExpensesTotal,
+          lowStockCount: products.where((p) => p.isLowStock).length,
+          recentActivity: activity.take(3).toList(),
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        loading: false,
-        error: 'No se pudo cargar la información. Intenta de nuevo.',
-      ));
+      emit(
+        state.copyWith(
+          loading: false,
+          error: 'No se pudo cargar la información. Intenta de nuevo.',
+        ),
+      );
     }
   }
 }

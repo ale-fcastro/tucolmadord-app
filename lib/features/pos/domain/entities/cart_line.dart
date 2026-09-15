@@ -24,12 +24,12 @@ class CartLine {
   bool get isUnit => mode == SellMode.unit;
 
   CartLine copyWith({double? quantity, double? lineTotal}) => CartLine(
-        id: id,
-        productId: productId,
-        name: name,
-        mode: mode,
-        quantity: quantity ?? this.quantity,
-        unitPrice: unitPrice,
-        lineTotal: lineTotal ?? this.lineTotal,
-      );
+    id: id,
+    productId: productId,
+    name: name,
+    mode: mode,
+    quantity: quantity ?? this.quantity,
+    unitPrice: unitPrice,
+    lineTotal: lineTotal ?? this.lineTotal,
+  );
 }

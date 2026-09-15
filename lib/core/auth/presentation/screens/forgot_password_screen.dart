@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
 import '../../../../shared/widgets/feedback/app_notification.dart';
 import '../../../../shared/widgets/inputs/app_text_field.dart';
+import '../../../../shared/widgets/layout/app_auth_screen.dart';
 import '../../../../shared/widgets/text/app_text.dart';
 
 final _emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
@@ -44,39 +45,31 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppAuthScreen(
       appBar: AppBar(title: const Text('Recuperar contraseña')),
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(20, 16, 20, 24 + MediaQuery.of(context).viewInsets.bottom),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const AppTitle('Recupera tu contraseña'),
-                const SizedBox(height: 6),
-                const AppDescription('Te enviaremos instrucciones a tu correo para restablecerla.'),
-                const SizedBox(height: 24),
-                AppTextField(
-                  label: 'Correo electrónico',
-                  controller: _emailCtrl,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: _emailValidator,
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: PrimaryButton(
-                    label: 'ENVIAR INSTRUCCIONES',
-                    onPressed: _submit,
-                  ),
-                ),
-              ],
-            ),
+      formKey: _formKey,
+      children: [
+        const AppTitle('Recupera tu contraseña'),
+        const SizedBox(height: 6),
+        const AppDescription(
+          'Te enviaremos instrucciones a tu correo para restablecerla.',
+        ),
+        const SizedBox(height: 24),
+        AppTextField(
+          label: 'Correo electrónico',
+          controller: _emailCtrl,
+          keyboardType: TextInputType.emailAddress,
+          validator: _emailValidator,
+        ),
+        const SizedBox(height: 24),
+        SizedBox(
+          width: double.infinity,
+          child: PrimaryButton(
+            label: 'ENVIAR INSTRUCCIONES',
+            onPressed: _submit,
           ),
         ),
-      ),
+      ],
     );
   }
 }

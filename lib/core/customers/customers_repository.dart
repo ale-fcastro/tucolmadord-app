@@ -27,19 +27,28 @@ class CustomersRepository {
   /// feed de actividad reciente del dashboard.
   Future<List<Map<String, dynamic>>> getTodayPayments() async {
     final db = await _appDatabase.database;
-    final startOfDay = DateTime.now().copyWith(hour: 0, minute: 0, second: 0, millisecond: 0).toIso8601String();
-    return db.rawQuery('''
+    final startOfDay = DateTime.now()
+        .copyWith(hour: 0, minute: 0, second: 0, millisecond: 0)
+        .toIso8601String();
+    return db.rawQuery(
+      '''
       SELECT m.amount AS amount, m.created_at AS created_at, c.name AS customer_name
       FROM fiado_movements m
       JOIN fiado_customers c ON m.customer_id = c.id
       WHERE m.type = 'pago' AND m.created_at >= ?
       ORDER BY m.created_at DESC
-    ''', [startOfDay]);
+    ''',
+      [startOfDay],
+    );
   }
 
   Future<Customer?> getById(String id) async {
     final db = await _appDatabase.database;
-    final rows = await db.query('fiado_customers', where: 'id = ?', whereArgs: [id]);
+    final rows = await db.query(
+      'fiado_customers',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
     if (rows.isEmpty) return null;
     return Customer.fromMap(rows.first);
   }
@@ -57,7 +66,12 @@ class CustomersRepository {
 
   Future<void> addCustomer(String name) async {
     final db = await _appDatabase.database;
-    final customer = Customer(id: _uuid.v4(), name: name, balance: 0, createdAt: DateTime.now());
+    final customer = Customer(
+      id: _uuid.v4(),
+      name: name,
+      balance: 0,
+      createdAt: DateTime.now(),
+    );
     await db.transaction((txn) async {
       await txn.insert('fiado_customers', customer.toMap());
       await enqueueSync(

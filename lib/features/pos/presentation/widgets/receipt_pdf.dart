@@ -30,11 +30,14 @@ Future<Uint8List> buildReceiptPdf({
     }
   }
 
-  final businessName = (profile?.name.trim().isNotEmpty ?? false) ? profile!.name.trim() : 'TuColmadoRD';
+  final businessName = (profile?.name.trim().isNotEmpty ?? false)
+      ? profile!.name.trim()
+      : 'TuColmadoRD';
   const smallGray = pw.TextStyle(fontSize: 9, color: PdfColors.grey700);
   final bold = pw.TextStyle(fontWeight: pw.FontWeight.bold);
 
-  pw.Widget row(String label, String value, {pw.TextStyle? style}) => pw.Padding(
+  pw.Widget row(String label, String value, {pw.TextStyle? style}) =>
+      pw.Padding(
         padding: const pw.EdgeInsets.symmetric(vertical: 2),
         child: pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -58,43 +61,84 @@ Future<Uint8List> buildReceiptPdf({
                 pw.Container(height: 60, width: 60, child: pw.Image(logo)),
                 pw.SizedBox(height: 6),
               ],
-              pw.Text(businessName, style: pw.TextStyle(fontSize: 15, fontWeight: pw.FontWeight.bold), textAlign: pw.TextAlign.center),
-              if (profile?.rnc?.isNotEmpty ?? false) pw.Text('RNC: ${profile!.rnc}', style: smallGray, textAlign: pw.TextAlign.center),
-              if (profile?.address?.isNotEmpty ?? false) pw.Text(profile!.address!, style: smallGray, textAlign: pw.TextAlign.center),
-              if (profile?.phone?.isNotEmpty ?? false) pw.Text('Tel. ${profile!.phone}', style: smallGray, textAlign: pw.TextAlign.center),
+              pw.Text(
+                businessName,
+                style: pw.TextStyle(
+                  fontSize: 15,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+                textAlign: pw.TextAlign.center,
+              ),
+              if (profile?.rnc?.isNotEmpty ?? false)
+                pw.Text(
+                  'RNC: ${profile!.rnc}',
+                  style: smallGray,
+                  textAlign: pw.TextAlign.center,
+                ),
+              if (profile?.address?.isNotEmpty ?? false)
+                pw.Text(
+                  profile!.address!,
+                  style: smallGray,
+                  textAlign: pw.TextAlign.center,
+                ),
+              if (profile?.phone?.isNotEmpty ?? false)
+                pw.Text(
+                  'Tel. ${profile!.phone}',
+                  style: smallGray,
+                  textAlign: pw.TextAlign.center,
+                ),
             ],
           ),
           pw.SizedBox(height: 12),
           pw.Divider(),
-          row('Factura', '#${sale.id.substring(0, 6).toUpperCase()}', style: bold),
+          row(
+            'Factura',
+            '#${sale.id.substring(0, 6).toUpperCase()}',
+            style: bold,
+          ),
           row('Fecha', _fullDateLabel(sale.createdAt)),
           pw.Divider(),
           pw.SizedBox(height: 4),
-          ...items.map((item) => pw.Padding(
-                padding: const pw.EdgeInsets.symmetric(vertical: 4),
-                child: pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    pw.Row(
-                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                      children: [
-                        pw.Expanded(child: pw.Text(item.productName)),
-                        pw.Text(Money.label(item.lineTotal)),
-                      ],
+          ...items.map(
+            (item) => pw.Padding(
+              padding: const pw.EdgeInsets.symmetric(vertical: 4),
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      pw.Expanded(child: pw.Text(item.productName)),
+                      pw.Text(Money.label(item.lineTotal)),
+                    ],
+                  ),
+                  if (item.unitPrice != null)
+                    pw.Text(
+                      '${_quantityLabel(item.quantity)} x ${Money.label(item.unitPrice!)}',
+                      style: smallGray,
                     ),
-                    if (item.unitPrice != null)
-                      pw.Text('${_quantityLabel(item.quantity)} x ${Money.label(item.unitPrice!)}', style: smallGray),
-                  ],
-                ),
-              )),
+                ],
+              ),
+            ),
+          ),
           pw.Divider(),
-          row('TOTAL', Money.label(sale.total), style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 13)),
+          row(
+            'TOTAL',
+            Money.label(sale.total),
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 13),
+          ),
           pw.SizedBox(height: 6),
           row('Método', paymentMethodLabel(sale.paymentMethod)),
-          if (sale.receivedAmount != null) row('Recibido', Money.label(sale.receivedAmount!)),
-          if (sale.changeAmount != null) row('Cambio', Money.label(sale.changeAmount!)),
+          if (sale.receivedAmount != null)
+            row('Recibido', Money.label(sale.receivedAmount!)),
+          if (sale.changeAmount != null)
+            row('Cambio', Money.label(sale.changeAmount!)),
           pw.SizedBox(height: 20),
-          pw.Text('¡Gracias por su compra!', style: smallGray, textAlign: pw.TextAlign.center),
+          pw.Text(
+            '¡Gracias por su compra!',
+            style: smallGray,
+            textAlign: pw.TextAlign.center,
+          ),
         ],
       ),
     ),

@@ -11,7 +11,8 @@ import 'business_models.dart';
 /// (endpoints pre-login), estas llamadas van autenticadas con el token de la
 /// sesión guardada.
 class BusinessRepository {
-  BusinessRepository(this._session, {http.Client? client}) : _client = client ?? http.Client();
+  BusinessRepository(this._session, {http.Client? client})
+    : _client = client ?? http.Client();
 
   final AuthSessionStore _session;
   final http.Client _client;
@@ -20,13 +21,18 @@ class BusinessRepository {
 
   Future<BusinessProfile> getCurrent() async {
     final response = await _client
-        .get(Uri.parse('${ApiConfig.baseUrl}/businesses/current'), headers: await _authHeaders())
+        .get(
+          Uri.parse('${ApiConfig.baseUrl}/businesses/current'),
+          headers: await _authHeaders(),
+        )
         .timeout(_timeout);
 
     if (response.statusCode == 200) {
       return BusinessProfile.fromJson(_decode(response));
     }
-    throw ApiException('No se pudo cargar el perfil del negocio (${response.statusCode}).');
+    throw ApiException(
+      'No se pudo cargar el perfil del negocio (${response.statusCode}).',
+    );
   }
 
   Future<BusinessProfile> update({
@@ -57,12 +63,16 @@ class BusinessRepository {
       return BusinessProfile.fromJson(body);
     }
     if (response.statusCode == 403) {
-      throw ApiException(_message(body) ?? 'Solo el dueño del negocio puede editar estos datos.');
+      throw ApiException(
+        _message(body) ?? 'Solo el dueño del negocio puede editar estos datos.',
+      );
     }
     if (response.statusCode == 400) {
       throw ApiException(_message(body) ?? 'Revisa los datos ingresados.');
     }
-    throw ApiException(_message(body) ?? 'No se pudo guardar (${response.statusCode}).');
+    throw ApiException(
+      _message(body) ?? 'No se pudo guardar (${response.statusCode}).',
+    );
   }
 
   Future<Map<String, String>> _authHeaders() async {

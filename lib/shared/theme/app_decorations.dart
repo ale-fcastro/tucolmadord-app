@@ -18,16 +18,20 @@ class AppDecorations {
   /// listas de movimientos). Toma el color de outline del theme activo en
   /// vez de un gris fijo, así se ve bien en modo claro y oscuro.
   static BoxDecoration rowDivider(BuildContext context) => BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.6)),
-        ),
-      );
+    border: Border(
+      bottom: BorderSide(
+        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.6),
+      ),
+    ),
+  );
 
   /// Línea que separa una barra fija (footer de carrito, nav inferior) del
   /// contenido que queda arriba.
   static BoxDecoration topDivider(BuildContext context) => BoxDecoration(
-        border: Border(
-          top: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.6)),
-        ),
-      );
+    border: Border(
+      top: BorderSide(
+        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.6),
+      ),
+    ),
+  );
 }

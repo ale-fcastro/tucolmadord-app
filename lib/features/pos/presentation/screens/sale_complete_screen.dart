@@ -22,12 +22,18 @@ class SaleCompleteScreen extends StatelessWidget {
 
   Future<void> _share(BuildContext context, Sale sale) async {
     final bytes = await _buildPdf(sale);
-    await Printing.sharePdf(bytes: bytes, filename: 'factura_${sale.id.substring(0, 6)}.pdf');
+    await Printing.sharePdf(
+      bytes: bytes,
+      filename: 'factura_${sale.id.substring(0, 6)}.pdf',
+    );
   }
 
   Future<void> _print(BuildContext context, Sale sale) async {
     final bytes = await _buildPdf(sale);
-    await Printing.layoutPdf(onLayout: (_) async => bytes, name: 'factura_${sale.id.substring(0, 6)}.pdf');
+    await Printing.layoutPdf(
+      onLayout: (_) async => bytes,
+      name: 'factura_${sale.id.substring(0, 6)}.pdf',
+    );
   }
 
   Future<Uint8List> _buildPdf(Sale sale) {
@@ -41,106 +47,143 @@ class SaleCompleteScreen extends StatelessWidget {
     final sale = cubit.state.lastSale;
     final profile = sl<BusinessProfileStore>().cached;
     final logoBase64 = profile?.logoBase64;
-    final businessName = (profile?.name.trim().isNotEmpty ?? false) ? profile!.name.trim() : 'TuColmadoRD';
+    final businessName = (profile?.name.trim().isNotEmpty ?? false)
+        ? profile!.name.trim()
+        : 'TuColmadoRD';
 
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 32, 20, 16),
-          child: Column(
-            children: [
-              _BrandBadge(logoBase64: logoBase64),
-              const SizedBox(height: 10),
-              AppSubtitle(businessName, textAlign: TextAlign.center),
-              if (profile?.rnc?.isNotEmpty ?? false) ...[
-                const SizedBox(height: 2),
-                AppLabel('RNC: ${profile!.rnc}'),
-              ],
-              const SizedBox(height: 16),
-              const Icon(Icons.check_circle_outline, size: 44, color: AppColors.success),
-              const SizedBox(height: 10),
-              const AppTitle('Venta completada'),
-              const SizedBox(height: 6),
-              AppAmount(Money.label(sale?.total ?? 0)),
-              const SizedBox(height: 18),
-              AppCard(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ...?sale?.items.map((l) => Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 6),
-                            child: Row(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _BrandBadge(logoBase64: logoBase64),
+                    const SizedBox(height: 10),
+                    AppSubtitle(businessName, textAlign: TextAlign.center),
+                    if (profile?.rnc?.isNotEmpty ?? false) ...[
+                      const SizedBox(height: 2),
+                      AppLabel('RNC: ${profile!.rnc}'),
+                    ],
+                    const SizedBox(height: 16),
+                    const Icon(
+                      Icons.check_circle_outline,
+                      size: 44,
+                      color: AppColors.success,
+                    ),
+                    const SizedBox(height: 10),
+                    const AppTitle('Venta completada'),
+                    const SizedBox(height: 6),
+                    AppAmount(Money.label(sale?.total ?? 0)),
+                    const SizedBox(height: 18),
+                    AppCard(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ...?sale?.items.map(
+                              (l) => Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 6,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    AppLabel(l.productName),
+                                    AppSubtitle(Money.label(l.lineTotal)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 8),
+                              child: Divider(height: 1),
+                            ),
+                            Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                AppLabel(l.productName),
-                                AppSubtitle(Money.label(l.lineTotal)),
+                                const AppSubtitle('Método'),
+                                AppSubtitle(
+                                  sale != null
+                                      ? paymentMethodLabel(sale.paymentMethod)
+                                      : '',
+                                ),
                               ],
                             ),
-                          )),
-                      const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Divider(height: 1)),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const AppSubtitle('Método'),
-                          AppSubtitle(sale != null ? paymentMethodLabel(sale.paymentMethod) : ''),
-                        ],
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 18),
+                    SizedBox(
+                      width: double.infinity,
+                      child: PrimaryButton(
+                        label: 'NUEVA VENTA',
+                        onPressed: () {
+                          cubit.startNewSale();
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SecondaryButton(
+                            icon: Icons.share_outlined,
+                            label: 'Compartir',
+                            onPressed: sale == null
+                                ? null
+                                : () async {
+                                    try {
+                                      await _share(context, sale);
+                                    } catch (_) {
+                                      if (context.mounted)
+                                        AppNotification.error(
+                                          context,
+                                          'No se pudo compartir la factura.',
+                                        );
+                                    }
+                                  },
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: SecondaryButton(
+                            icon: Icons.print_outlined,
+                            label: 'Imprimir',
+                            onPressed: sale == null
+                                ? null
+                                : () async {
+                                    try {
+                                      await _print(context, sale);
+                                    } catch (_) {
+                                      if (context.mounted)
+                                        AppNotification.error(
+                                          context,
+                                          'No se pudo imprimir la factura.',
+                                        );
+                                    }
+                                  },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 18),
-              SizedBox(
-                width: double.infinity,
-                child: PrimaryButton(
-                  label: 'NUEVA VENTA',
-                  onPressed: () {
-                    cubit.startNewSale();
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: SecondaryButton(
-                      icon: Icons.share_outlined,
-                      label: 'Compartir',
-                      onPressed: sale == null
-                          ? null
-                          : () async {
-                              try {
-                                await _share(context, sale);
-                              } catch (_) {
-                                if (context.mounted) AppNotification.error(context, 'No se pudo compartir la factura.');
-                              }
-                            },
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: SecondaryButton(
-                      icon: Icons.print_outlined,
-                      label: 'Imprimir',
-                      onPressed: sale == null
-                          ? null
-                          : () async {
-                              try {
-                                await _print(context, sale);
-                              } catch (_) {
-                                if (context.mounted) AppNotification.error(context, 'No se pudo imprimir la factura.');
-                              }
-                            },
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
@@ -169,10 +212,18 @@ class _BrandBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.backgroundLight,
         shape: BoxShape.circle,
-        image: image != null ? DecorationImage(image: image, fit: BoxFit.cover) : null,
+        image: image != null
+            ? DecorationImage(image: image, fit: BoxFit.cover)
+            : null,
       ),
       alignment: Alignment.center,
-      child: image == null ? const Icon(Icons.storefront_outlined, size: 26, color: AppColors.primary) : null,
+      child: image == null
+          ? const Icon(
+              Icons.storefront_outlined,
+              size: 26,
+              color: AppColors.primary,
+            )
+          : null,
     );
   }
 }

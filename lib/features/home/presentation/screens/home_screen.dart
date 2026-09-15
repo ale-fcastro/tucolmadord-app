@@ -20,10 +20,28 @@ class HomeScreen extends StatelessWidget {
   final VoidCallback onGoInventarioLow;
 
   String get _dateLabel {
-    const days = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+    const days = [
+      'lunes',
+      'martes',
+      'miércoles',
+      'jueves',
+      'viernes',
+      'sábado',
+      'domingo',
+    ];
     const months = [
-      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+      'enero',
+      'febrero',
+      'marzo',
+      'abril',
+      'mayo',
+      'junio',
+      'julio',
+      'agosto',
+      'septiembre',
+      'octubre',
+      'noviembre',
+      'diciembre',
     ];
     final now = DateTime.now();
     return '${days[now.weekday - 1]}, ${now.day} de ${months[now.month - 1]}';
@@ -55,7 +73,10 @@ class HomeScreen extends StatelessWidget {
                     image: true,
                     child: const Align(
                       alignment: Alignment.centerLeft,
-                      child: Image(image: AssetImage('assets/images/logo-full.png'), height: 26),
+                      child: Image(
+                        image: AssetImage('assets/images/logo-full.png'),
+                        height: 26,
+                      ),
                     ),
                   ),
                 ),
@@ -63,7 +84,10 @@ class HomeScreen extends StatelessWidget {
                   width: 38,
                   height: 38,
                   padding: const EdgeInsets.all(6),
-                  decoration: const BoxDecoration(color: AppColors.infoBg, shape: BoxShape.circle),
+                  decoration: const BoxDecoration(
+                    color: AppColors.infoBg,
+                    shape: BoxShape.circle,
+                  ),
                   child: Image.asset('assets/images/logo-mark.png'),
                 ),
               ],
@@ -83,7 +107,11 @@ class HomeScreen extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.smartphone, size: 12, color: Theme.of(context).colorScheme.outline),
+                  Icon(
+                    Icons.smartphone,
+                    size: 12,
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
                   const SizedBox(width: 6),
                   const AppLabel('Guardado en este dispositivo'),
                 ],
@@ -92,7 +120,10 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 14),
             Container(
               width: double.infinity,
-              decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(AppDecorations.radius)),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(AppDecorations.radius),
+              ),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,7 +132,10 @@ class HomeScreen extends StatelessWidget {
                   FittedBox(
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.centerLeft,
-                    child: AppAmount(Money.label(state.todaySales), color: Colors.white),
+                    child: AppAmount(
+                      Money.label(state.todaySales),
+                      color: Colors.white,
+                    ),
                   ),
                 ],
               ),
@@ -115,10 +149,34 @@ class HomeScreen extends StatelessWidget {
               mainAxisSpacing: 10,
               childAspectRatio: 1.5,
               children: [
-                _StatTile(icon: Icons.trending_up, color: AppColors.success, bg: AppColors.successBg, label: 'Ganancia est.', value: Money.label(state.estimatedProfit)),
-                _StatTile(icon: Icons.groups_outlined, color: AppColors.error, bg: AppColors.errorBg, label: 'Fiado pendiente', value: Money.label(state.fiadoPending)),
-                _StatTile(icon: Icons.receipt_long_outlined, color: AppColors.primary, bg: AppColors.infoBg, label: 'Gastos de hoy', value: Money.label(state.todayExpenses)),
-                _StatTile(icon: Icons.warning_amber_rounded, color: AppColors.warning, bg: AppColors.warningBg, label: 'Productos bajos', value: '${state.lowStockCount}'),
+                _StatTile(
+                  icon: Icons.trending_up,
+                  color: AppColors.success,
+                  bg: AppColors.successBg,
+                  label: 'Ganancia est.',
+                  value: Money.label(state.estimatedProfit),
+                ),
+                _StatTile(
+                  icon: Icons.groups_outlined,
+                  color: AppColors.error,
+                  bg: AppColors.errorBg,
+                  label: 'Fiado pendiente',
+                  value: Money.label(state.fiadoPending),
+                ),
+                _StatTile(
+                  icon: Icons.receipt_long_outlined,
+                  color: AppColors.primary,
+                  bg: AppColors.infoBg,
+                  label: 'Gastos de hoy',
+                  value: Money.label(state.todayExpenses),
+                ),
+                _StatTile(
+                  icon: Icons.warning_amber_rounded,
+                  color: AppColors.warning,
+                  bg: AppColors.warningBg,
+                  label: 'Productos bajos',
+                  value: '${state.lowStockCount}',
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -127,7 +185,11 @@ class HomeScreen extends StatelessWidget {
               children: [
                 const AppSubtitle('Actividad reciente'),
                 GestureDetector(
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const VentasHistorialScreen())),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const VentasHistorialScreen(),
+                    ),
+                  ),
                   child: const AppLabel('Ver todas', color: AppColors.primary),
                 ),
               ],
@@ -152,7 +214,12 @@ class HomeScreen extends StatelessWidget {
                               Container(
                                 width: 32,
                                 height: 32,
-                                decoration: BoxDecoration(color: a.bgColor, borderRadius: BorderRadius.circular(AppDecorations.radius)),
+                                decoration: BoxDecoration(
+                                  color: a.bgColor,
+                                  borderRadius: BorderRadius.circular(
+                                    AppDecorations.radius,
+                                  ),
+                                ),
                                 alignment: Alignment.center,
                                 child: Icon(a.icon, size: 16, color: a.color),
                               ),
@@ -168,7 +235,9 @@ class HomeScreen extends StatelessWidget {
                                       style: Theme.of(context)
                                           .textTheme
                                           .titleSmall
-                                          ?.copyWith(fontWeight: FontWeight.w500),
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                     ),
                                     AppLabel(relativeLabel(a.time)),
                                   ],
@@ -192,18 +261,30 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 14),
               GestureDetector(
                 onTap: () {
-                  context.read<ProductsCubit>().setFilter(ProductsFilter.lowStock);
+                  context.read<ProductsCubit>().setFilter(
+                    ProductsFilter.lowStock,
+                  );
                   onGoInventarioLow();
                 },
                 child: AppCard(
                   color: AppColors.warningBg,
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   child: Row(
                     children: [
-                      const Icon(Icons.warning_amber_rounded, size: 18, color: AppColors.warning),
+                      const Icon(
+                        Icons.warning_amber_rounded,
+                        size: 18,
+                        color: AppColors.warning,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: AppSubtitle('${state.lowStockCount} productos con poco inventario', color: AppColors.warning),
+                        child: AppSubtitle(
+                          '${state.lowStockCount} productos con poco inventario',
+                          color: AppColors.warning,
+                        ),
                       ),
                       const AppLabel('Ver →', color: AppColors.warning),
                     ],
@@ -219,7 +300,13 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _StatTile extends StatelessWidget {
-  const _StatTile({required this.icon, required this.color, required this.bg, required this.label, required this.value});
+  const _StatTile({
+    required this.icon,
+    required this.color,
+    required this.bg,
+    required this.label,
+    required this.value,
+  });
   final IconData icon;
   final Color color;
   final Color bg;
@@ -237,7 +324,10 @@ class _StatTile extends StatelessWidget {
           Container(
             width: 30,
             height: 30,
-            decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(AppDecorations.radius)),
+            decoration: BoxDecoration(
+              color: bg,
+              borderRadius: BorderRadius.circular(AppDecorations.radius),
+            ),
             alignment: Alignment.center,
             child: Icon(icon, size: 16, color: color),
           ),

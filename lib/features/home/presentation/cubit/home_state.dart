@@ -10,25 +10,30 @@ class ActivityItem {
   final DateTime time;
   final double amount;
 
-  const ActivityItem({required this.type, required this.title, required this.time, required this.amount});
+  const ActivityItem({
+    required this.type,
+    required this.title,
+    required this.time,
+    required this.amount,
+  });
 
   IconData get icon => switch (type) {
-        ActivityType.sale => Icons.point_of_sale_outlined,
-        ActivityType.payment => Icons.receipt_long_outlined,
-        ActivityType.expense => Icons.receipt_long_outlined,
-      };
+    ActivityType.sale => Icons.point_of_sale_outlined,
+    ActivityType.payment => Icons.receipt_long_outlined,
+    ActivityType.expense => Icons.receipt_long_outlined,
+  };
 
   Color get color => switch (type) {
-        ActivityType.sale => AppColors.success,
-        ActivityType.payment => AppColors.primary,
-        ActivityType.expense => AppColors.error,
-      };
+    ActivityType.sale => AppColors.success,
+    ActivityType.payment => AppColors.primary,
+    ActivityType.expense => AppColors.error,
+  };
 
   Color get bgColor => switch (type) {
-        ActivityType.sale => AppColors.successBg,
-        ActivityType.payment => AppColors.infoBg,
-        ActivityType.expense => AppColors.errorBg,
-      };
+    ActivityType.sale => AppColors.successBg,
+    ActivityType.payment => AppColors.infoBg,
+    ActivityType.expense => AppColors.errorBg,
+  };
 }
 
 /// Sentinel used by [HomeState.copyWith] so `error` can be explicitly reset

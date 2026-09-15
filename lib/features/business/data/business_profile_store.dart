@@ -11,7 +11,8 @@ import 'business_repository.dart';
 /// y, si falla, cae en lo último guardado — igual de "offline-first" que el
 /// resto de la app.
 class BusinessProfileStore {
-  BusinessProfileStore(this._repository, {FlutterSecureStorage? storage}) : _storage = storage ?? const FlutterSecureStorage();
+  BusinessProfileStore(this._repository, {FlutterSecureStorage? storage})
+    : _storage = storage ?? const FlutterSecureStorage();
 
   final BusinessRepository _repository;
   final FlutterSecureStorage _storage;

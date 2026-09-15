@@ -61,7 +61,12 @@ class _BusinessSettingsScreenState extends State<BusinessSettingsScreen> {
   Future<void> _pickLogo(ImageSource source) async {
     Navigator.of(context).pop();
     try {
-      final file = await ImagePicker().pickImage(source: source, maxWidth: 512, maxHeight: 512, imageQuality: 80);
+      final file = await ImagePicker().pickImage(
+        source: source,
+        maxWidth: 512,
+        maxHeight: 512,
+        imageQuality: 80,
+      );
       if (file == null) return;
       final bytes = await file.readAsBytes();
       setState(() {
@@ -91,10 +96,17 @@ class _BusinessSettingsScreenState extends State<BusinessSettingsScreen> {
               title: const Text('Tomar foto'),
               onTap: () => _pickLogo(ImageSource.camera),
             ),
-            if (_pendingLogoBytes != null || (_existingLogoBase64 != null && !_removeLogo))
+            if (_pendingLogoBytes != null ||
+                (_existingLogoBase64 != null && !_removeLogo))
               ListTile(
-                leading: const Icon(Icons.delete_outline, color: AppColors.error),
-                title: const Text('Quitar logo', style: TextStyle(color: AppColors.error)),
+                leading: const Icon(
+                  Icons.delete_outline,
+                  color: AppColors.error,
+                ),
+                title: const Text(
+                  'Quitar logo',
+                  style: TextStyle(color: AppColors.error),
+                ),
                 onTap: () {
                   Navigator.of(context).pop();
                   setState(() {
@@ -115,9 +127,13 @@ class _BusinessSettingsScreenState extends State<BusinessSettingsScreen> {
     await cubit.save(
       name: _nameCtrl.text.trim(),
       rnc: _rncCtrl.text.trim().isEmpty ? null : _rncCtrl.text.trim(),
-      address: _addressCtrl.text.trim().isEmpty ? null : _addressCtrl.text.trim(),
+      address: _addressCtrl.text.trim().isEmpty
+          ? null
+          : _addressCtrl.text.trim(),
       phone: _phoneCtrl.text.trim().isEmpty ? null : _phoneCtrl.text.trim(),
-      logoBase64: _pendingLogoBytes != null ? base64Encode(_pendingLogoBytes!) : null,
+      logoBase64: _pendingLogoBytes != null
+          ? base64Encode(_pendingLogoBytes!)
+          : null,
       removeLogo: _removeLogo,
     );
     if (!mounted) return;
@@ -148,7 +164,12 @@ class _BusinessSettingsScreenState extends State<BusinessSettingsScreen> {
           return Form(
             key: _formKey,
             child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(16, 20, 16, 24 + MediaQuery.of(context).viewInsets.bottom),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                20,
+                16,
+                24 + MediaQuery.of(context).viewInsets.bottom,
+              ),
               child: Column(
                 children: [
                   const AppDescription(
@@ -158,7 +179,10 @@ class _BusinessSettingsScreenState extends State<BusinessSettingsScreen> {
                   const SizedBox(height: 18),
                   GestureDetector(
                     onTap: _showLogoPicker,
-                    child: _LogoPreview(pendingBytes: _pendingLogoBytes, existingBase64: _removeLogo ? null : _existingLogoBase64),
+                    child: _LogoPreview(
+                      pendingBytes: _pendingLogoBytes,
+                      existingBase64: _removeLogo ? null : _existingLogoBase64,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   const AppLabel('Toca para cambiar el logo'),
@@ -166,12 +190,20 @@ class _BusinessSettingsScreenState extends State<BusinessSettingsScreen> {
                   AppTextField(
                     label: 'Nombre del negocio',
                     controller: _nameCtrl,
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Ponle un nombre a tu negocio' : null,
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Ponle un nombre a tu negocio'
+                        : null,
                   ),
                   const SizedBox(height: 14),
-                  AppTextField(label: 'RNC o cédula (opcional)', controller: _rncCtrl),
+                  AppTextField(
+                    label: 'RNC o cédula (opcional)',
+                    controller: _rncCtrl,
+                  ),
                   const SizedBox(height: 14),
-                  AppTextField(label: 'Dirección (opcional)', controller: _addressCtrl),
+                  AppTextField(
+                    label: 'Dirección (opcional)',
+                    controller: _addressCtrl,
+                  ),
                   const SizedBox(height: 14),
                   AppTextField(
                     label: 'Teléfono (opcional)',
@@ -181,7 +213,11 @@ class _BusinessSettingsScreenState extends State<BusinessSettingsScreen> {
                   const SizedBox(height: 24),
                   SizedBox(
                     width: double.infinity,
-                    child: PrimaryButton(label: 'GUARDAR', isLoading: state.saving, onPressed: _save),
+                    child: PrimaryButton(
+                      label: 'GUARDAR',
+                      isLoading: state.saving,
+                      onPressed: _save,
+                    ),
                   ),
                 ],
               ),
@@ -218,10 +254,19 @@ class _LogoPreview extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.backgroundLight,
         shape: BoxShape.circle,
-        image: image != null ? DecorationImage(image: image, fit: BoxFit.cover) : null,
+        image: image != null
+            ? DecorationImage(image: image, fit: BoxFit.cover)
+            : null,
       ),
       alignment: Alignment.center,
-      child: image == null ? Icon(Icons.storefront_outlined, size: 36, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)) : null,
+      child: image == null
+          ? Icon(
+              Icons.storefront_outlined,
+              size: 36,
+              color: Theme.of(context).colorScheme.onSurface
+                  .withValues(alpha: 0.4),
+            )
+          : null,
     );
   }
 }

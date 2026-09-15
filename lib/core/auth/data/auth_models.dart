@@ -1,6 +1,10 @@
 /// Respuesta de `POST /auth/register`.
 class RegisterResult {
-  const RegisterResult({required this.userId, required this.email, required this.emailConfirmed});
+  const RegisterResult({
+    required this.userId,
+    required this.email,
+    required this.emailConfirmed,
+  });
 
   final String userId;
   final String email;
@@ -34,7 +38,8 @@ class AuthSessionData {
   factory AuthSessionData.fromJson(Map<String, dynamic> json) {
     return AuthSessionData(
       token: json['token']?.toString() ?? '',
-      expiresAtUtc: DateTime.tryParse(json['expiresAtUtc']?.toString() ?? '')?.toUtc() ??
+      expiresAtUtc:
+          DateTime.tryParse(json['expiresAtUtc']?.toString() ?? '')?.toUtc() ??
           DateTime.now().toUtc().add(const Duration(hours: 1)),
       userId: json['userId']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
@@ -45,12 +50,41 @@ class AuthSessionData {
   }
 
   Map<String, dynamic> toJson() => {
-        'token': token,
-        'expiresAtUtc': expiresAtUtc.toIso8601String(),
-        'userId': userId,
-        'email': email,
-        'fullName': fullName,
-        'businessId': businessId,
-        'businessName': businessName,
-      };
+    'token': token,
+    'expiresAtUtc': expiresAtUtc.toIso8601String(),
+    'userId': userId,
+    'email': email,
+    'fullName': fullName,
+    'businessId': businessId,
+    'businessName': businessName,
+  };
+}
+
+/// Ticket de corta duración que devuelve `POST /auth/google` (202) cuando el
+/// correo de Google no tiene cuenta todavía. `CompleteGoogleRegistrationScreen`
+/// lo reenvía junto con el nombre del negocio y el teléfono para crear la
+/// cuenta — expira a los 10 minutos.
+class GooglePendingRegistration {
+  const GooglePendingRegistration({
+    required this.registrationToken,
+    required this.email,
+    required this.fullName,
+  });
+
+  final String registrationToken;
+  final String email;
+  final String fullName;
+}
+
+/// Resultado de `POST /auth/google`: o bien el correo ya tenía cuenta y
+/// [session] trae una sesión válida, o es nuevo y [pendingRegistration] trae
+/// el ticket para completar el registro. Nunca vienen los dos a la vez.
+class GoogleAuthResult {
+  const GoogleAuthResult.session(this.session) : pendingRegistration = null;
+
+  const GoogleAuthResult.pendingRegistration(this.pendingRegistration)
+    : session = null;
+
+  final AuthSessionData? session;
+  final GooglePendingRegistration? pendingRegistration;
 }
